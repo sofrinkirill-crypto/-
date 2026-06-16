@@ -321,8 +321,18 @@ class Scheduler:
 
         sorted_days = sorted(d for d in week if d.month == month)
 
+        EVENING_SLOTS = ('eveningInside', 'eveningManager', 'night', 'night2')
+        MORNING_SLOTS = ('morningInside', 'morningManager')
+
         def on_day(name, d):
             return any(schedule[d].get(sl) == name for sl in SLOTS)
+
+        def had_evening_prev(name, d):
+            """True if employee had an evening/night shift the day before d."""
+            prev = d - __import__('datetime').timedelta(days=1)
+            if prev not in schedule:
+                return False
+            return any(schedule[prev].get(sl) == name for sl in EVENING_SLOTS)
 
         def future_days(emp_name, after_d):
             """Work days remaining after today (not including today)."""
@@ -340,15 +350,17 @@ class Scheduler:
             ))
             return eligible[0]
 
-        def pick_slot(candidates, d, count_dict, soft_cap, hard_cap=3):
+        def pick_slot(candidates, d, count_dict, soft_cap, hard_cap=3, is_morning=False):
             """Pick employee for a slot type with urgency-aware sorting."""
-            eligible = [e for e in candidates
-                        if count_dict[e['name']] < soft_cap
-                        and not on_day(e['name'], d) and total[e['name']] < TARGET]
+            def ok(e):
+                if on_day(e['name'], d): return False
+                if total[e['name']] >= TARGET: return False
+                if is_morning and had_evening_prev(e['name'], d): return False
+                return True
+
+            eligible = [e for e in candidates if ok(e) and count_dict[e['name']] < soft_cap]
             if not eligible:
-                eligible = [e for e in candidates
-                            if count_dict[e['name']] < hard_cap
-                            and not on_day(e['name'], d) and total[e['name']] < TARGET]
+                eligible = [e for e in candidates if ok(e) and count_dict[e['name']] < hard_cap]
             if not eligible:
                 return None
             def key(e):
@@ -368,7 +380,7 @@ class Scheduler:
 
             # morningInside
             if not s['morningInside']:
-                emp = pick_slot(workers, d, m_count, M_SOFT)
+                emp = pick_slot(workers, d, m_count, M_SOFT, is_morning=True)
                 if emp:
                     s['morningInside'] = emp['name']
                     m_count[emp['name']] += 1
@@ -408,7 +420,7 @@ class Scheduler:
                 if d not in work_map.get(emp['name'], []) or on_day(emp['name'], d):
                     continue
                 s = schedule[d]
-                if not s['morningInside'] and m_count[emp['name']] < 3:
+                if not s['morningInside'] and m_count[emp['name']] < 3 and not had_evening_prev(emp['name'], d):
                     s['morningInside'] = emp['name']
                     m_count[emp['name']] += 1; total[emp['name']] += 1
                 elif not s['eveningInside'] and e_count[emp['name']] < 3:
