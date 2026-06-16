@@ -274,14 +274,18 @@ class Scheduler:
                 forced.add(sun)
                 l6_weekend_done[emp['name']] = True
 
-        # Need exactly 2 days off per week (from current month days)
+        # Need exactly 2 days off per week (from current month days).
+        # For partial weeks (<3 days in month) reduce proportionally so at
+        # least 1 work day always remains.
         month_days = [d for d in week if d.month == month]
+        max_off = max(0, len(month_days) - 1)   # leave at least 1 work day
+        target_off = min(2, max_off)             # normally 2, less for partial weeks
         forced_in_month = forced & set(month_days)
 
-        if len(forced_in_month) >= 2:
+        if len(forced_in_month) >= target_off:
             return forced
 
-        needed = 2 - len(forced_in_month)
+        needed = target_off - len(forced_in_month)
         available = [d for d in month_days if d not in forced]
         extra = self._pick_off_days(available, needed, emp, week, self._current_week_idx)
         return forced | set(extra)
@@ -297,21 +301,28 @@ class Scheduler:
 
         if pool_idx is not None:
             n = len(inside_pool)
-            # ── Special 4-cycle rotation for up to 4 employees ─────────────────
-            # Pairs defined by weekday numbers (0=Mon … 6=Sun).
-            # The pair at position 3 always contains Sunday (weekday 6) so that
-            # exactly one employee is off on Sunday each week, leaving 3 workers
-            # for 3 Sunday inside-type slots.
+            # ── Rotation cycles by pool size ────────────────────────────────────
+            # Each cycle entry is a (weekday_a, weekday_b) pair for the off days.
+            # Rule: on any given day at most n-1 employees can be off so that at
+            # least 2 employees always work (needed to fill mI + eI).
+            # n=3 → 3-cycle: never put Sat+Sun together (would leave only 1 worker)
+            # n=4 → 4-cycle: one slot is Sat+Sun so exactly 1 off on Sunday/week
+            THREE_CYCLE = [
+                (0, 1),  # Mon+Tue
+                (2, 3),  # Wed+Thu
+                (4, 5),  # Fri+Sat
+            ]
             FOUR_CYCLE = [
                 (0, 1),  # Mon+Tue
                 (2, 3),  # Wed+Thu
                 (4, 5),  # Fri+Sat
                 (5, 6),  # Sat+Sun
             ]
-            if n <= 4:
+            if n == 3:
+                target_wd = THREE_CYCLE[(pool_idx + week_idx) % 3]
+            elif n == 4:
                 target_wd = FOUR_CYCLE[(pool_idx + week_idx) % 4]
             else:
-                # More than 4: fall through to generic stride logic below
                 target_wd = None
 
             if target_wd is not None:
