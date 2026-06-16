@@ -12,15 +12,71 @@ DATA_FILE = os.path.join(os.path.dirname(__file__), 'data.json')
 SLOTS = ['morningInside', 'morningManager', 'eveningInside', 'eveningManager',
          'night', 'night2', 'rdm', 'office', 'sw']
 
-# ─── Data ───────────────────────────────────────────────────────────────────
+# ─── Storage: Postgres if available, else data.json ─────────────────────────
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+def _get_pg():
+    import psycopg2, psycopg2.extras
+    url = DATABASE_URL
+    if url and url.startswith('postgres://'):
+        url = url.replace('postgres://', 'postgresql://', 1)
+    conn = psycopg2.connect(url)
+    return conn
+
+def _pg_init():
+    conn = _get_pg()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS store (
+            key TEXT PRIMARY KEY,
+            value JSONB NOT NULL
+        )
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
 
 def load_data():
+    if DATABASE_URL:
+        try:
+            _pg_init()
+            conn = _get_pg()
+            cur = conn.cursor()
+            cur.execute("SELECT key, value FROM store WHERE key IN ('employees','requests','schedules')")
+            rows = {r[0]: r[1] for r in cur.fetchall()}
+            cur.close(); conn.close()
+            return {
+                'employees': rows.get('employees', []),
+                'requests':  rows.get('requests', {}),
+                'schedules': rows.get('schedules', {}),
+            }
+        except Exception as e:
+            print('PG load error:', e)
+    # fallback to file
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {'employees': [], 'requests': {}, 'schedules': {}}
 
 def save_data(data):
+    if DATABASE_URL:
+        try:
+            _pg_init()
+            conn = _get_pg()
+            cur = conn.cursor()
+            import psycopg2.extras
+            for key in ('employees', 'requests', 'schedules'):
+                cur.execute("""
+                    INSERT INTO store(key, value) VALUES(%s, %s)
+                    ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value
+                """, (key, json.dumps(data.get(key), ensure_ascii=False)))
+            conn.commit()
+            cur.close(); conn.close()
+            return
+        except Exception as e:
+            print('PG save error:', e)
+    # fallback to file
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
