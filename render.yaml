@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: pbo-scheduler
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+    disk:
+      name: data
+      mountPath: /opt/render/project/src
+      sizeGB: 1
