@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Генератор расписания</title>
+<style>
+  :root {
+    --bg: #f2f2f7; --card: #fff; --border: #e5e5ea;
+    --text: #1c1c1e; --sub: #8e8e93;
+    --morning: #ff9500; --evening: #af52de; --night: #1c1c1e;
+    --rdm: #34c759; --office: #5856d6; --sw: #5ac8fa; --off: #d1d1d6;
+    --blue: #007aff; --red: #ff3b30; --green: #34c759;
+    --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* Header */
+  header { background: var(--card); border-bottom: 1px solid var(--border);
+           padding: 12px 20px; display: flex; align-items: center; gap: 12px;
+           position: sticky; top: 0; z-index: 100; }
+  header h1 { font-size: 17px; font-weight: 600; margin-right: auto; }
+  select, button { height: 34px; border-radius: 8px; border: 1px solid var(--border);
+                   padding: 0 12px; font-size: 13px; cursor: pointer; }
+  select { background: var(--bg); }
+  button { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 500; }
+  button.secondary { background: var(--card); color: var(--text); border-color: var(--border); }
+  button.danger { background: var(--red); border-color: var(--red); }
+  button:active { opacity: .85; }
+
+  /* Schedule */
+  main { padding: 20px; }
+  .week-block { background: var(--card); border-radius: var(--radius);
+                box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden; }
+  .week-title { padding: 10px 16px; font-weight: 600; font-size: 13px;
+                color: var(--sub); border-bottom: 1px solid var(--border);
+                background: var(--bg); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0; border-right: 1px solid var(--border); }
+  th:last-child, td:last-child { border-right: none; }
+  thead th { padding: 8px 6px; font-size: 12px; font-weight: 500; color: var(--sub);
+             text-align: center; border-bottom: 1px solid var(--border);
+             background: var(--bg); min-width: 90px; }
+  thead th.emp-col { min-width: 130px; text-align: left; padding-left: 14px; }
+  thead th.today { background: #e8f2ff; color: var(--blue); }
+
+  /* Rows */
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafafa; }
+  .emp-cell { padding: 10px 14px; font-weight: 500; }
+  .emp-level { display: inline-block; width: 20px; height: 20px; border-radius: 50%;
+               font-size: 11px; font-weight: 700; text-align: center; line-height: 20px;
+               color: #fff; margin-right: 6px; flex-shrink: 0; }
+  .l3 { background: #ff9500; } .l4 { background: #007aff; }
+  .l5 { background: #34c759; } .l6 { background: #af52de; }
+  .emp-name-wrap { display: flex; align-items: center; }
+  .emp-req-btn { margin-left: auto; color: var(--sub); font-size: 11px; cursor: pointer;
+                 background: none; border: none; padding: 2px 6px; border-radius: 4px; }
+  .emp-req-btn:hover { background: var(--bg); }
+
+  /* Day cells */
+  .day-cell { text-align: center; vertical-align: top; padding: 6px 4px;
+              cursor: pointer; min-width: 90px; }
+  .day-cell:hover { background: #f0f0f5; }
+  .day-cell.off-day { background: #f2f2f7; cursor: default; }
+  .day-cell.out-of-month { opacity: .35; pointer-events: none; }
+
+  .shift-badge { display: inline-block; border-radius: 6px; padding: 3px 8px;
+                 font-size: 12px; font-weight: 500; margin: 2px auto; }
+  .s-morningInside  { background: #fff3e0; color: var(--morning); }
+  .s-morningManager { background: #fff3e0; color: #e65100; }
+  .s-eveningInside  { background: #f3e5f5; color: var(--evening); }
+  .s-eveningManager { background: #f3e5f5; color: #6a0dad; }
+  .s-night          { background: #1c1c1e; color: #fff; }
+  .s-night2         { background: #3a3a3c; color: #fff; }
+  .s-rdm            { background: #e8f5e9; color: var(--rdm); }
+  .s-office         { background: #ede7f6; color: var(--office); }
+  .s-sw             { background: #e0f7fa; color: #0097a7; }
+  .s-off            { color: var(--sub); font-size: 12px; }
+
+  .shift-count { font-size: 11px; font-weight: 700; padding: 1px 6px;
+                 border-radius: 10px; }
+  .cnt-ok { background: #e8f5e9; color: var(--green); }
+  .cnt-warn { background: #fff3e0; color: var(--morning); }
+
+  /* Bottom stats row */
+  .stats-cell { padding: 6px 4px; text-align: center; font-size: 11px; color: var(--sub);
+                border-top: 1px solid var(--border); background: #fafafa; }
+  .stats-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+               margin-right: 2px; vertical-align: middle; }
+
+  /* Modal */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200;
+             display: none; align-items: center; justify-content: center; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--card); border-radius: 14px; width: 480px; max-width: 95vw;
+           max-height: 85vh; display: flex; flex-direction: column; }
+  .modal-header { padding: 16px 20px; font-weight: 600; font-size: 16px;
+                  border-bottom: 1px solid var(--border); display: flex;
+                  align-items: center; justify-content: space-between; }
+  .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border);
+                  display: flex; gap: 8px; justify-content: flex-end; }
+  .close-btn { background: none; border: none; color: var(--sub);
+               font-size: 20px; cursor: pointer; padding: 0; width: 28px; height: 28px;
+               border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .close-btn:hover { background: var(--bg); }
+
+  /* Forms */
+  .form-row { margin-bottom: 14px; }
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--sub);
+          margin-bottom: 4px; }
+  input[type=text], select.form-select {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 14px; background: var(--bg); }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; }
+  input[type=checkbox] { width: 16px; height: 16px; }
+
+  /* Employee list */
+  .emp-list { display: flex; flex-direction: column; gap: 8px; }
+  .emp-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+              background: var(--bg); border-radius: 8px; }
+  .emp-item-name { flex: 1; font-weight: 500; }
+  .emp-item-level { font-size: 12px; color: var(--sub); }
+  .emp-item-actions { display: flex; gap: 6px; }
+  .icon-btn { background: none; border: none; cursor: pointer; color: var(--sub);
+              padding: 4px; border-radius: 6px; font-size: 16px; }
+  .icon-btn:hover { background: var(--border); }
+
+  /* Request calendar */
+  .req-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .req-day-hdr { text-align: center; font-size: 11px; color: var(--sub); padding: 2px; }
+  .req-day { text-align: center; padding: 6px 2px; border-radius: 6px; cursor: pointer;
+             font-size: 13px; border: 1px solid transparent; }
+  .req-day:hover { border-color: var(--blue); }
+  .req-day.req-off { background: #ffe0e0; color: var(--red); border-color: #ffb3b3; }
+  .req-day.req-vacation { background: #e8f5e9; color: var(--green); border-color: #a5d6a7; }
+  .req-day.other-month { opacity: .3; pointer-events: none; }
+  .req-legend { display: flex; gap: 12px; margin-top: 12px; font-size: 12px; }
+  .req-legend-item { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .req-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Slot edit modal */
+  .slot-list { display: flex; flex-direction: column; gap: 6px; }
+  .slot-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+              background: var(--bg); border-radius: 8px; }
+  .slot-label { width: 100px; font-size: 13px; font-weight: 500; }
+  .slot-select { flex: 1; padding: 6px 8px; border: 1px solid var(--border);
+                 border-radius: 6px; font-size: 13px; background: var(--card); }
+
+  /* Print */
+  @media print {
+    header, .week-title { display: none; }
+    body { background: #fff; }
+    .week-block { box-shadow: none; border: 1px solid #ddd; break-after: page; }
+    .day-cell, .emp-cell { padding: 4px 6px; }
+  }
+
+  .empty-state { text-align: center; color: var(--sub); padding: 40px;
+                 font-size: 15px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Расписание</h1>
+  <select id="monthSel"></select>
+  <select id="yearSel"></select>
+  <button id="genBtn">Сгенерировать</button>
+  <button class="secondary" id="empBtn">Сотрудники</button>
+  <button class="secondary" onclick="window.print()">Печать</button>
+</header>
+
+<main id="scheduleContainer">
+  <div class="empty-state">Выберите месяц и нажмите «Сгенерировать»</div>
+</main>
+
+<!-- Employee Modal -->
+<div class="overlay" id="empModal">
+  <div class="modal">
+    <div class="modal-header">
+      Сотрудники
+      <button class="close-btn" onclick="closeModal('empModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="emp-list" id="empList"></div>
+      <button style="margin-top:14px;width:100%" onclick="openAddEmp()">+ Добавить сотрудника</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Employee Modal -->
+<div class="overlay" id="editEmpModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="editEmpTitle">Новый сотрудник</span>
+      <button class="close-btn" onclick="closeModal('editEmpModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Имя</label>
+        <input type="text" id="empName" placeholder="Имя сотрудника">
+      </div>
+      <div class="form-row">
+        <label>Уровень</label>
+        <select class="form-select" id="empLevel">
+          <option value="level3">Level 3 — Менеджер</option>
+          <option value="level4">Level 4 — Ассистент директора</option>
+          <option value="level5">Level 5 — Руководитель отдела</option>
+          <option value="level6">Level 6 — Директор</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="checkbox-row">
+          <input type="checkbox" id="empCanInside">
+          <label for="empCanInside" style="margin:0">Может работать Inside</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="checkbox-row">
+          <input type="checkbox" id="empNightShifts">
+          <label for="empNightShifts" style="margin:0">Работает ночью</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary" onclick="closeModal('editEmpModal')">Отмена</button>
+      <button id="saveEmpBtn" onclick="saveEmployee()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Requests Modal -->
+<div class="overlay" id="reqModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="reqModalTitle">Запросы</span>
+      <button class="close-btn" onclick="closeModal('reqModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="req-legend">
+        <div class="req-legend-item" onclick="setReqMode('off')">
+          <div class="req-legend-dot" style="background:#ff3b30"></div>
+          <span>Выходной</span>
+        </div>
+        <div class="req-legend-item" onclick="setReqMode('vacation')">
+          <div class="req-legend-dot" style="background:#34c759"></div>
+          <span>Отпуск</span>
+        </div>
+        <div class="req-legend-item" onclick="setReqMode(null)">
+          <div class="req-legend-dot" style="background:#d1d1d6"></div>
+          <span>Убрать</span>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--sub);margin:8px 0">
+        Режим: <strong id="reqModeLabel">Выходной</strong> — кликайте по дням
+      </p>
+      <div class="req-grid" id="reqGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Slot Edit Modal -->
+<div class="overlay" id="slotModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="slotModalTitle">Редактировать день</span>
+      <button class="close-btn" onclick="closeModal('slotModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="slot-list" id="slotList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary" onclick="closeModal('slotModal')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let employees = [];
+let requests = {};
+let schedule = {};  // date_str → {slot: name}
+let currentYear, currentMonth;
+let editingEmpId = null;
+let reqEmpName = null;
+let reqMode = 'off';
+let slotEditDate = null;
+
+const SLOT_LABELS = {
+  morningInside: 'Утро-И', morningManager: 'Утро-М',
+  eveningInside: 'Вечер-И', eveningManager: 'Вечер-М',
+  night: 'Ночь', night2: 'Ночь-2', rdm: 'RDM',
+  office: 'Офис', sw: 'SW'
+};
+const SLOTS = Object.keys(SLOT_LABELS);
+const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь',
+                'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const DAY_NAMES = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+window.onload = async () => {
+  const now = new Date();
+  currentYear = now.getFullYear();
+  currentMonth = now.getMonth() + 1;
+
+  // Month selector
+  const ms = document.getElementById('monthSel');
+  MONTHS.forEach((m, i) => {
+    const o = document.createElement('option');
+    o.value = i + 1; o.textContent = m;
+    if (i + 1 === currentMonth) o.selected = true;
+    ms.appendChild(o);
+  });
+  ms.onchange = () => { currentMonth = +ms.value; loadSchedule(); };
+
+  // Year selector
+  const ys = document.getElementById('yearSel');
+  for (let y = now.getFullYear() - 1; y <= now.getFullYear() + 2; y++) {
+    const o = document.createElement('option');
+    o.value = y; o.textContent = y;
+    if (y === currentYear) o.selected = true;
+    ys.appendChild(o);
+  }
+  ys.onchange = () => { currentYear = +ys.value; loadSchedule(); };
+
+  document.getElementById('genBtn').onclick = generateSchedule;
+  document.getElementById('empBtn').onclick = openEmpModal;
+
+  await Promise.all([loadEmployees(), loadRequests()]);
+  await loadSchedule();
+};
+
+// ─── API helpers ──────────────────────────────────────────────────────────────
+const api = async (method, url, body) => {
+  const r = await fetch(url, {
+    method, headers: {'Content-Type': 'application/json'},
+    body: body ? JSON.stringify(body) : undefined
+  });
+  return r.json();
+};
+
+// ─── Data loading ─────────────────────────────────────────────────────────────
+async function loadEmployees() {
+  employees = await api('GET', '/api/employees');
+}
+async function loadRequests() {
+  requests = await api('GET', '/api/requests');
+}
+async function loadSchedule() {
+  schedule = await api('GET', `/api/schedule?year=${currentYear}&month=${currentMonth}`);
+  renderSchedule();
+}
+
+// ─── Generate ─────────────────────────────────────────────────────────────────
+async function generateSchedule() {
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true; btn.textContent = 'Генерирую...';
+  try {
+    schedule = await api('POST', '/api/generate', { year: currentYear, month: currentMonth });
+    renderSchedule();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Сгенерировать';
+  }
+}
+
+// ─── Render schedule ──────────────────────────────────────────────────────────
+function renderSchedule() {
+  const container = document.getElementById('scheduleContainer');
+  if (!employees.length) {
+    container.innerHTML = '<div class="empty-state">Добавьте сотрудников в разделе «Сотрудники»</div>';
+    return;
+  }
+
+  // Build calendar
+  const first = new Date(currentYear, currentMonth - 1, 1);
+  const last = new Date(currentYear, currentMonth, 0);
+  const startOff = first.getDay() === 0 ? 6 : first.getDay() - 1;
+  const start = new Date(first); start.setDate(start.getDate() - startOff);
+  const endOff = last.getDay() === 0 ? 0 : 7 - last.getDay();
+  const end = new Date(last); end.setDate(end.getDate() + endOff);
+
+  const allDays = [];
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1))
+    allDays.push(new Date(d));
+
+  const weeks = [];
+  for (let i = 0; i < allDays.length; i += 7)
+    weeks.push(allDays.slice(i, i + 7));
+
+  const today = new Date();
+  const todayStr = fmtDate(today);
+
+  // Helper: get employee's shift on a date
+  function getEmpShift(empName, dateStr) {
+    const day = schedule[dateStr] || {};
+    for (const slot of SLOTS)
+      if (day[slot] === empName) return slot;
+    return null;
+  }
+
+  function isOff(empName, dateStr) {
+    const d = new Date(dateStr);
+    if (d.getMonth() + 1 !== currentMonth) return false;
+    const req = (requests[empName] || {})[dateStr];
+    if (req === 'off' || req === 'vacation') return true;
+    return false;
+  }
+
+  function shiftCountInWeek(empName, week) {
+    return week.filter(d => {
+      const ds = fmtDate(d);
+      return d.getMonth() + 1 === currentMonth && getEmpShift(empName, ds);
+    }).length;
+  }
+
+  container.innerHTML = '';
+
+  weeks.forEach((week, wi) => {
+    const block = document.createElement('div');
+    block.className = 'week-block';
+
+    const weekStart = week.find(d => d.getMonth() + 1 === currentMonth);
+    const weekEnd = [...week].reverse().find(d => d.getMonth() + 1 === currentMonth);
+    if (!weekStart) return;
+
+    const title = document.createElement('div');
+    title.className = 'week-title';
+    title.textContent = `Неделя ${wi + 1}  ·  ${fmtDisplay(weekStart)} — ${fmtDisplay(weekEnd)}`;
+    block.appendChild(title);
+
+    const table = document.createElement('table');
+
+    // Header row
+    const thead = document.createElement('thead');
+    let hr = '<tr><th class="emp-col">Сотрудник</th>';
+    week.forEach(d => {
+      const ds = fmtDate(d);
+      const isToday = ds === todayStr;
+      const inMonth = d.getMonth() + 1 === currentMonth;
+      hr += `<th class="${isToday ? 'today' : ''} ${!inMonth ? 'out-of-month' : ''}">
+        ${DAY_NAMES[d.getDay() === 0 ? 6 : d.getDay() - 1]}<br>
+        <span style="font-size:15px;font-weight:700;color:var(--text)">${d.getDate()}</span>
+      </th>`;
+    });
+    hr += '</tr>';
+    thead.innerHTML = hr;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
+    // Sort employees by level desc
+    const sortedEmps = [...employees].sort((a, b) => {
+      const lv = e => parseInt(e.level.replace('level',''));
+      return lv(b) - lv(a);
+    });
+
+    sortedEmps.forEach(emp => {
+      const tr = document.createElement('tr');
+      const lvNum = emp.level.replace('level','');
+      const cnt = shiftCountInWeek(emp.name, week);
+      const cntClass = cnt >= 5 ? 'cnt-ok' : 'cnt-warn';
+
+      tr.innerHTML = `<td class="emp-cell">
+        <div class="emp-name-wrap">
+          <span class="emp-level l${lvNum}">${lvNum}</span>
+          <span>${emp.name}</span>
+          <span class="shift-count ${cntClass}" style="margin-left:6px">${cnt}</span>
+          <button class="emp-req-btn" onclick="openReqModal('${emp.name}')">📅</button>
+        </div>
+      </td>`;
+
+      week.forEach(d => {
+        const ds = fmtDate(d);
+        const inMonth = d.getMonth() + 1 === currentMonth;
+        const shift = getEmpShift(emp.name, ds);
+        const off = isOff(emp.name, ds);
+        const td = document.createElement('td');
+        td.className = `day-cell${!inMonth ? ' out-of-month' : ''}${off && !shift ? ' off-day' : ''}`;
+
+        if (shift) {
+          td.innerHTML = `<span class="shift-badge s-${shift}">${SLOT_LABELS[shift]}</span>`;
+        } else if (off) {
+          td.innerHTML = `<span class="s-off">Вых</span>`;
+        }
+
+        if (inMonth) {
+          td.onclick = () => openSlotModal(ds, week);
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    // Stats row (filled slots per day)
+    const statsTr = document.createElement('tr');
+    statsTr.innerHTML = '<td class="stats-cell" style="text-align:left;padding-left:14px;color:var(--sub);font-size:11px">Слоты</td>';
+    week.forEach(d => {
+      const ds = fmtDate(d);
+      const day = schedule[ds] || {};
+      const filled = SLOTS.filter(s => day[s]).length;
+      const total = SLOTS.length;
+      const td = document.createElement('td');
+      td.className = 'stats-cell';
+      td.textContent = `${filled}/${total}`;
+      statsTr.appendChild(td);
+    });
+    tbody.appendChild(statsTr);
+
+    table.appendChild(tbody);
+    block.appendChild(table);
+    container.appendChild(block);
+  });
+}
+
+// ─── Employee management ──────────────────────────────────────────────────────
+function openEmpModal() {
+  renderEmpList();
+  openModal('empModal');
+}
+
+function renderEmpList() {
+  const list = document.getElementById('empList');
+  if (!employees.length) {
+    list.innerHTML = '<div style="color:var(--sub);text-align:center;padding:20px">Нет сотрудников</div>';
+    return;
+  }
+  const sortedEmps = [...employees].sort((a, b) => {
+    return parseInt(b.level.replace('level','')) - parseInt(a.level.replace('level',''));
+  });
+  list.innerHTML = sortedEmps.map(emp => {
+    const lvNum = emp.level.replace('level','');
+    const flags = [
+      emp.canInside ? 'Inside' : null,
+      emp.nightShifts ? 'Ночь' : null
+    ].filter(Boolean).join(', ');
+    return `<div class="emp-item">
+      <span class="emp-level l${lvNum}">${lvNum}</span>
+      <span class="emp-item-name">${emp.name}</span>
+      <span class="emp-item-level">${flags || '—'}</span>
+      <div class="emp-item-actions">
+        <button class="icon-btn" onclick="openEditEmp('${emp.id}')">✏️</button>
+        <button class="icon-btn" onclick="deleteEmp('${emp.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAddEmp() {
+  editingEmpId = null;
+  document.getElementById('editEmpTitle').textContent = 'Новый сотрудник';
+  document.getElementById('empName').value = '';
+  document.getElementById('empLevel').value = 'level3';
+  document.getElementById('empCanInside').checked = false;
+  document.getElementById('empNightShifts').checked = false;
+  openModal('editEmpModal');
+}
+
+function openEditEmp(id) {
+  const emp = employees.find(e => e.id === id);
+  if (!emp) return;
+  editingEmpId = id;
+  document.getElementById('editEmpTitle').textContent = 'Редактировать';
+  document.getElementById('empName').value = emp.name;
+  document.getElementById('empLevel').value = emp.level;
+  document.getElementById('empCanInside').checked = !!emp.canInside;
+  document.getElementById('empNightShifts').checked = !!emp.nightShifts;
+  openModal('editEmpModal');
+}
+
+async function saveEmployee() {
+  const data = {
+    name: document.getElementById('empName').value.trim(),
+    level: document.getElementById('empLevel').value,
+    canInside: document.getElementById('empCanInside').checked,
+    nightShifts: document.getElementById('empNightShifts').checked,
+  };
+  if (!data.name) return;
+
+  if (editingEmpId) {
+    await api('PUT', `/api/employees/${editingEmpId}`, data);
+  } else {
+    await api('POST', '/api/employees', data);
+  }
+  await loadEmployees();
+  renderEmpList();
+  renderSchedule();
+  closeModal('editEmpModal');
+}
+
+async function deleteEmp(id) {
+  if (!confirm('Удалить сотрудника?')) return;
+  await api('DELETE', `/api/employees/${id}`);
+  await loadEmployees();
+  renderEmpList();
+  renderSchedule();
+}
+
+// ─── Requests ─────────────────────────────────────────────────────────────────
+function openReqModal(empName) {
+  reqEmpName = empName;
+  document.getElementById('reqModalTitle').textContent = `Запросы — ${empName}`;
+  renderReqGrid();
+  openModal('reqModal');
+}
+
+function setReqMode(mode) {
+  reqMode = mode;
+  const labels = { off: 'Выходной', vacation: 'Отпуск', null: 'Убрать' };
+  document.getElementById('reqModeLabel').textContent = labels[mode] || 'Убрать';
+}
+
+function renderReqGrid() {
+  const grid = document.getElementById('reqGrid');
+  const empReqs = requests[reqEmpName] || {};
+
+  // Build calendar
+  const first = new Date(currentYear, currentMonth - 1, 1);
+  const startOff = first.getDay() === 0 ? 6 : first.getDay() - 1;
+  const start = new Date(first); start.setDate(start.getDate() - startOff);
+
+  let html = DAY_NAMES.map(d => `<div class="req-day-hdr">${d}</div>`).join('');
+
+  const end = new Date(currentYear, currentMonth, 0);
+  const endOff = end.getDay() === 0 ? 0 : 7 - end.getDay();
+  const endDate = new Date(end); endDate.setDate(endDate.getDate() + endOff);
+
+  for (let d = new Date(start); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const ds = fmtDate(d);
+    const inMonth = d.getMonth() + 1 === currentMonth;
+    const reqType = empReqs[ds];
+    const cls = [
+      'req-day',
+      reqType === 'off' ? 'req-off' : '',
+      reqType === 'vacation' ? 'req-vacation' : '',
+      !inMonth ? 'other-month' : ''
+    ].filter(Boolean).join(' ');
+    html += `<div class="${cls}" data-date="${ds}" onclick="toggleReq('${ds}')">${d.getDate()}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+async function toggleReq(dateStr) {
+  await api('POST', '/api/requests', {
+    emp_name: reqEmpName, date: dateStr, type: reqMode
+  });
+  await loadRequests();
+  renderReqGrid();
+  renderSchedule();
+}
+
+// ─── Slot editing ─────────────────────────────────────────────────────────────
+function openSlotModal(dateStr, week) {
+  slotEditDate = dateStr;
+  const d = new Date(dateStr);
+  document.getElementById('slotModalTitle').textContent =
+    `${DAY_NAMES[d.getDay() === 0 ? 6 : d.getDay() - 1]}, ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+
+  const day = schedule[dateStr] || {};
+  const list = document.getElementById('slotList');
+
+  const empOptions = employees.map(e =>
+    `<option value="${e.name}">${e.name}</option>`
+  ).join('');
+
+  list.innerHTML = SLOTS.map(slot => {
+    const val = day[slot] || '';
+    return `<div class="slot-row">
+      <span class="slot-label">${SLOT_LABELS[slot]}</span>
+      <select class="slot-select" data-slot="${slot}" onchange="updateSlot('${dateStr}', '${slot}', this.value)">
+        <option value="">— пусто —</option>
+        ${empOptions}
+      </select>
+    </div>`;
+  }).join('');
+
+  // Set current values
+  SLOTS.forEach(slot => {
+    const sel = list.querySelector(`[data-slot="${slot}"]`);
+    if (sel) sel.value = day[slot] || '';
+  });
+
+  openModal('slotModal');
+}
+
+async function updateSlot(dateStr, slot, value) {
+  await api('PUT', '/api/schedule/slot', {
+    year: currentYear, month: currentMonth,
+    date_str: dateStr, slot, value
+  });
+  if (!schedule[dateStr]) schedule[dateStr] = {};
+  schedule[dateStr][slot] = value;
+  renderSchedule();
+}
+
+// ─── Modal helpers ────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtDisplay(d) {
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+}
+</script>
+</body>
+</html>
