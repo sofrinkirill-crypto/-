@@ -120,6 +120,19 @@ def add_employee():
     save_data(data)
     return jsonify(emp), 201
 
+@app.route('/api/employees/bulk', methods=['PUT'])
+def bulk_employees():
+    """Replace entire employee list (used by original HTML frontend)."""
+    data = load_data()
+    emps = request.json or []
+    # Assign IDs if missing
+    for e in emps:
+        if not e.get('id'):
+            e['id'] = str(uuid.uuid4())
+    data['employees'] = emps
+    save_data(data)
+    return jsonify({'ok': True, 'count': len(emps)})
+
 @app.route('/api/employees/<emp_id>', methods=['PUT'])
 def update_employee(emp_id):
     data = load_data()
@@ -136,19 +149,6 @@ def delete_employee(emp_id):
     data['employees'] = [e for e in data['employees'] if e['id'] != emp_id]
     save_data(data)
     return jsonify({'ok': True})
-
-@app.route('/api/employees/bulk', methods=['PUT'])
-def bulk_employees():
-    """Replace entire employee list (used by original HTML frontend)."""
-    data = load_data()
-    emps = request.json or []
-    # Assign IDs if missing
-    for e in emps:
-        if not e.get('id'):
-            e['id'] = str(uuid.uuid4())
-    data['employees'] = emps
-    save_data(data)
-    return jsonify({'ok': True, 'count': len(emps)})
 
 @app.route('/api/requests/bulk', methods=['PUT'])
 def bulk_requests():
