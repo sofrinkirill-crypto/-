@@ -4,15 +4,15 @@ McDonald's Schedule Generator — Flask Backend
 
 Реализованные правила:
  П.2  — менеджеры на окладе (level3-6, включая директора) — лидеры смен открытия/закрытия
-        (morningInside / eveningInside). Директор НЕ ставится в отдельный 'office' слот.
- П.4  — последовательность 2У+2В+2 выходных; на 1 неделе в месяц — 4 рабочих дня (доп. выходной)
+ П.4  — последовательность 2У+2В; одна неделя в месяц = 4 смены (доп. выходной)
  П.5  — интервал ≥13ч: запрет вечер→утро следующего дня
  П.6  — Сб+Вс выходные ≥1 раза в месяц для всех level3-6
  П.7  — не более 5 смен в неделю для окладников
  П.8  — не более 3 выходных подряд; нельзя создавать 4+ подряд на стыке недель
  П.9  — после ночной смены рекомендуется 2 совмещённых выходных
  П.10 — следующий день после ночи = выходной
- П.14 — в январские праздники (1-8 янв) не более 3 смен за весь период
+ П.14 — в январские праздники (1-8 янв) не более 3 смен — накопительный счёт
+ П.14 — российские праздники с двойной оплатой: level4-5 только morningInside/eveningInside
  Директор п.6 — ДВАЖДЫ в месяц выходные Сб+Вс
  Директор п.9 — вечерняя смена закрытия (eveningInside) приоритетна для директора
 """
@@ -28,6 +28,16 @@ SLOTS = ['morningInside', 'morningManager', 'eveningInside', 'eveningManager',
 
 MORNING_SLOTS = ('morningInside', 'morningManager')
 EVENING_SLOTS = ('eveningInside', 'eveningManager', 'night', 'night2')
+
+# Российские нерабочие праздничные дни с двойной оплатой (П.14)
+# Формат: (месяц, день)
+RU_DOUBLE_PAY_DAYS = {
+    (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8),
+    (2, 23), (3, 8), (5, 1), (5, 2), (5, 9), (6, 12), (11, 4)
+}
+
+def is_holiday(d):
+    return (d.month, d.day) in RU_DOUBLE_PAY_DAYS
 
 # ─── Storage ─────────────────────────────────────────────────────────────────
 
@@ -82,19 +92,14 @@ def save_data(data):
 # ─── Default employees ───────────────────────────────────────────────────────
 
 DEFAULT_EMPLOYEES = [
-    # level5 — Руководители департаментов: лидеры смен (morningInside / eveningInside / rdm)
     {'name': 'Кирилл',   'level': 'level5', 'canInside': True},
     {'name': 'Олег',     'level': 'level5', 'canInside': True},
     {'name': 'Вова',     'level': 'level5', 'canInside': True},
-    # level3 — Менеджеры ПБО: morningManager / eveningManager / sw / night
     {'name': 'Ангелина', 'level': 'level3', 'canInside': False},
     {'name': 'Антон',    'level': 'level3', 'canInside': False},
     {'name': 'Андрей',   'level': 'level3', 'canInside': False},
     {'name': 'Маша',     'level': 'level3', 'canInside': False},
     {'name': 'Ариана',   'level': 'level3', 'canInside': False},
-    # level6 — Директор: лидер смен открытия/закрытия (morningInside / eveningInside)
-    # П.2 политики: "включая директора ПБО управляли сменами открытия и закрытия"
-    # П.9 политики директора: вечерняя смена закрытия — приоритет
     {'name': 'Лиза',     'level': 'level6', 'canInside': True},
 ]
 
@@ -209,7 +214,6 @@ class Scheduler:
     MANDATORY = ['morningInside', 'morningManager', 'eveningInside', 'eveningManager']
     SALARY_LEVELS = ('level2', 'level3', 'level4', 'level5', 'level6')
 
-    # Российские январские праздники (1–8 января) — лимит 3 смены за период (п.14)
     JAN_HOLIDAY_START = 1
     JAN_HOLIDAY_END   = 8
 
@@ -238,11 +242,9 @@ class Scheduler:
         days  = sorted(schedule.keys())
         weeks = [days[i:i+7] for i in range(0, len(days), 7)]
 
-        # Ночные смены — отслеживаем для правила "выходной после ночи" (п.9/10)
         prev_nights = {emp['name']: set() for emp in self.employees}
 
-        # П.6 / Директор п.6: Сб+Вс выходные в месяце
-        # Директор: 2 раза, остальные: 1 раз
+        # П.6: Сб+Вс выходные — недели в месяце с полными Сб+Вс
         sat_sun_weeks = [
             wi for wi, w in enumerate(weeks)
             if any(d.weekday() == 5 and d.month == month for d in w)
@@ -252,7 +254,6 @@ class Scheduler:
         self._weekend_target_weeks = {}
         for i, emp in enumerate(salary_emps):
             if emp.get('level') == 'level6' and len(sat_sun_weeks) >= 2:
-                # Директор — два разных уикенда, равномерно по месяцу
                 n = len(sat_sun_weeks)
                 w1 = sat_sun_weeks[i % n]
                 w2 = sat_sun_weeks[(i + max(1, n // 2)) % n]
@@ -264,14 +265,10 @@ class Scheduler:
 
         weekend_done = {emp['name']: 0 for emp in self.employees}
 
-        # Случайный seed для разнообразия между генерациями (влияет на выбор пар выходных)
         self._gen_nonce = random.randint(0, 99)
 
-        # П.4: ротация 2У+2В — для каждого сотрудника и каждой недели определяем
-        # начинает ли он эту неделю с утренней или вечерней фазы.
-        # Чередуем: на чётных неделях (0,2,4…) одна фаза, на нечётных — другая.
-        # Добавляем nonce для разнообразия между генерациями.
-        self._week_start_morning = {}  # emp_name → set of week_idx where morning comes first
+        # П.4: ротация 2У+2В
+        self._week_start_morning = {}
         for emp in self.employees:
             emp_hash = sum(ord(c) for c in emp['name'])
             morning_weeks = set()
@@ -279,6 +276,23 @@ class Scheduler:
                 if ((emp_hash + wi + self._gen_nonce) % 2) == 0:
                     morning_weeks.add(wi)
             self._week_start_morning[emp['name']] = morning_weeks
+
+        # П.4: одна неделя в месяц = 4 смены (доп. выходной)
+        # Выбираем неделю с доп. выходным для каждого сотрудника
+        month_week_count = len([w for w in weeks if any(d.month == month for d in w)])
+        self._extra_off_week = {}
+        for i, emp in enumerate(salary_emps):
+            emp_hash = sum(ord(c) for c in emp['name'])
+            if month_week_count >= 2:
+                # Избегаем первую и последнюю неделю (могут быть неполными)
+                candidates = list(range(1, month_week_count - 1)) if month_week_count > 2 else [0]
+                chosen = candidates[(emp_hash + self._gen_nonce) % len(candidates)]
+                self._extra_off_week[emp['name']] = chosen
+            else:
+                self._extra_off_week[emp['name']] = -1  # не применять
+
+        # П.14: накопительный счёт смен за январские праздники 1-8 янв
+        self._jan_holiday_shifts = {emp['name']: 0 for emp in self.employees}
 
         for week_idx, week in enumerate(weeks):
             self._current_week_idx = week_idx
@@ -296,47 +310,29 @@ class Scheduler:
         if not month_days:
             return
 
-        # Назначаем выходные для каждого сотрудника
         work_map = {}
         for emp in self.employees:
             off = self._off_days(emp, week, prev_nights, month, weekend_done, week_idx)
             work_map[emp['name']] = [d for d in week if d not in off and d.month == month]
 
-        # П.4: определяем plan_type[emp_name][day] = 'morning' | 'evening'
         plan = self._build_rotation_plan(work_map, week, week_idx, month)
 
-        # 1. Inside-смены: level6 (директор), level5, level4 в порядке приоритета
         self._assign_all_inside(week, week_idx, work_map, schedule, month, plan)
-
-        # 2. Менеджеры level3: morningManager / eveningManager
         self._assign_managers(week, schedule, work_map, week_idx, month, plan)
-
-        # 2b. Emergency: заполнить пустые morningManager/eveningManager без лимита 5 смен
         self._assign_managers_emergency(week, schedule, work_map, month)
-
-        # 3. Ночные смены (только level3+, п.1)
         self._assign_nights(week, schedule, work_map, prev_nights, month)
-
-        # 4. SW (level3, только когда все обязательные слоты закрыты)
         self._assign_sw(week, schedule, work_map, month)
 
-        # 5. Office — административная работа директора на оставшихся рабочих днях
-        #    П.9 директора: после назначения лидерства сменой, оставшийся рабочий день — офис/RDM
         for emp in self.by_level.get('level6', []):
             self._assign_director_office(emp, work_map[emp['name']], schedule)
 
-        # 6. П.14: январские праздники — лимит 3 смен за 1-8 января
+        # П.14: январские праздники — накопительный лимит 3 смены
         if month == 1:
             self._enforce_january_holiday_limit(week, schedule)
 
-    # ── Rotation plan (П.4: 2У + 2В + 2 выходных) ───────────────────────────
+    # ── Rotation plan (П.4: 2У + 2В) ─────────────────────────────────────────
 
     def _build_rotation_plan(self, work_map, week, week_idx, month):
-        """
-        Для каждого сотрудника строим план: какие рабочие дни — утренние, какие — вечерние.
-        Последовательность: УУ потом ВВ (или ВВ потом УУ, зависит от фазы).
-        Пятый рабочий день (если есть) — чередуем.
-        """
         plan = {}
         for emp_name, work_days in work_map.items():
             sorted_days = sorted(d for d in work_days if d.month == month)
@@ -344,17 +340,12 @@ class Scheduler:
             morning_first = week_idx in self._week_start_morning.get(emp_name, set())
 
             if morning_first:
-                # УУ ВВ У? — два утра, два вечера, пятое утро
                 sequence = ['morning', 'morning', 'evening', 'evening', 'morning']
             else:
-                # ВВ УУ В? — два вечера, два утра, пятое вечер
                 sequence = ['evening', 'evening', 'morning', 'morning', 'evening']
 
             for i, d in enumerate(sorted_days):
-                if i < len(sequence):
-                    day_plan[d] = sequence[i]
-                else:
-                    day_plan[d] = 'morning'  # fallback
+                day_plan[d] = sequence[i] if i < len(sequence) else 'morning'
 
             plan[emp_name] = day_plan
         return plan
@@ -365,23 +356,21 @@ class Scheduler:
         emp_req = self.requests.get(emp['name'], {})
         forced = set()
 
-        # Запросы на выходной / отпуск
         for d in week:
             if emp_req.get(d.strftime('%Y-%m-%d')) in ('off', 'vacation'):
                 forced.add(d)
 
-        # П.10/9: после ночной — 1 обязательный + 1 рекомендуемый выходной
+        # П.10/9: после ночной — выходные
         night_dates = prev_nights.get(emp['name'], set())
         for d in week:
             prev = (d - timedelta(days=1)).strftime('%Y-%m-%d')
             if prev in night_dates:
                 forced.add(d)
-                # Рекомендуемый второй выходной (п.9)
                 next_d = d + timedelta(days=1)
                 if next_d in week:
                     forced.add(next_d)
 
-        # П.6 / Директор п.6: Сб+Вс выходные
+        # П.6: Сб+Вс выходные
         max_weekends = 2 if emp.get('level') == 'level6' else 1
         if emp.get('level') in self.SALARY_LEVELS:
             target_weeks = self._weekend_target_weeks.get(emp['name'], [])
@@ -394,18 +383,23 @@ class Scheduler:
 
         month_days = [d for d in week if d.month == month]
         max_off = max(0, len(month_days) - 1)
-        target_off = min(2, max_off)
-        forced_in_month = forced & set(month_days)
 
+        # П.4: в «доп. выходную» неделю — 3 выходных вместо 2 (4 смены вместо 5)
+        is_extra_off_week = (week_idx == self._extra_off_week.get(emp['name'], -1))
+        target_off = min(3 if is_extra_off_week else 2, max_off)
+        # Только если это полная неделя (7 дней текущего месяца) — иначе 2
+        if len(month_days) < 5:
+            target_off = min(2, max_off)
+
+        forced_in_month = forced & set(month_days)
         if len(forced_in_month) >= target_off:
-            return forced
+            return self._trim_consecutive_offs(forced, month_days)
 
         needed = target_off - len(forced_in_month)
         available = [d for d in month_days if d not in forced]
         extra = self._pick_off_days(available, needed, emp, week, week_idx)
         result = forced | set(extra)
 
-        # П.8: не более 3 выходных подряд внутри недели
         return self._trim_consecutive_offs(result, month_days)
 
     def _pick_off_days(self, available, needed, emp, week, week_idx):
@@ -419,7 +413,6 @@ class Scheduler:
 
         if pool_idx is not None:
             n = len(inside_pool)
-            # THREE_CYCLE включает Сб+Вс (было Пт+Сб — исправлено)
             THREE_CYCLE = [(0, 1), (2, 3), (5, 6)]
             FOUR_CYCLE  = [(0, 1), (2, 3), (4, 5), (5, 6)]
             if n == 3:
@@ -436,7 +429,7 @@ class Scheduler:
                 if len(matched) == 1 and needed == 1:
                     return matched
 
-        # Общий случай: ищем пару подряд
+        # Ищем ПОДРЯД идущую пару (П.6: совмещённые выходные)
         pairs = [(available[i], available[i+1])
                  for i in range(len(available)-1)
                  if (available[i+1]-available[i]).days == 1]
@@ -449,7 +442,7 @@ class Scheduler:
         return available[:needed]
 
     def _trim_consecutive_offs(self, off_set, month_days):
-        """П.8: убираем 4-й и далее выходной из серии подряд."""
+        """П.8: убираем 4-й+ выходной из серии подряд внутри недели."""
         off_sorted = sorted(d for d in off_set if d in month_days)
         to_remove = set()
         i = 0
@@ -457,8 +450,7 @@ class Scheduler:
             j = i
             while j + 1 < len(off_sorted) and (off_sorted[j+1] - off_sorted[j]).days == 1:
                 j += 1
-            run_len = j - i + 1
-            if run_len > 3:
+            if (j - i + 1) > 3:
                 for k in range(i + 3, j + 1):
                     to_remove.add(off_sorted[k])
             i = j + 1
@@ -466,41 +458,36 @@ class Scheduler:
 
     def _fix_straddle_offs(self, schedule, days, month):
         """
-        П.8: не группировать выходные конца недели с началом следующей (4+ подряд).
-        Запускаем после генерации всех недель — смотрим на стыки.
+        П.8: не допускать 4+ выходных подряд на стыке недель.
+        Ищем серии 4+ выходных подряд и принудительно добавляем смену на 3-й день.
         """
         for emp in self.employees:
             name = emp['name']
-            # Строим список дней с нулём смен (выходные) в пределах месяца
-            for i in range(3, len(days)):
-                # Проверяем серию i-3, i-2, i-1, i
-                run = all(
-                    not any(schedule[days[i-k]].get(s) == name for s in SLOTS)
-                    for k in range(4)
-                )
-                if run:
-                    # Есть 4 подряд — добавляем смену на days[i-1] (третий выходной → убрать)
-                    # Просто очищаем отметку (work_map уже отработан — вносим напрямую)
-                    d = days[i - 1]
-                    if d.month == month:
-                        # Ищем подходящий слот для этого сотрудника
-                        s = schedule[d]
-                        if not s.get('morningManager') and emp.get('level') == 'level3':
-                            s['morningManager'] = name
-                        elif not s.get('morningInside') and emp.get('canInside'):
-                            s['morningInside'] = name
-                        # Если не получилось вставить — принимаем как есть (исключение)
+            run = []
+            for d in days:
+                if not any(schedule[d].get(s) == name for s in SLOTS):
+                    run.append(d)
+                    if len(run) >= 4:
+                        # 3-й выходной в серии (индекс 2) делаем рабочим
+                        target_d = run[2]
+                        if target_d.month == month and not any(schedule[target_d].get(s) == name for s in SLOTS):
+                            s = schedule[target_d]
+                            if emp.get('level') == 'level3' and not s.get('morningManager'):
+                                s['morningManager'] = name
+                            elif emp.get('canInside') and not s.get('morningInside'):
+                                s['morningInside'] = name
+                        run = run[3:]  # перезапускаем после исправления
+                else:
+                    run = []
 
     # ── Shift assignment ──────────────────────────────────────────────────────
 
     def _assign_all_inside(self, week, week_idx, work_map, schedule, month, plan):
         """
-        П.2: менеджеры на окладе — лидеры смен открытия (morningInside) и закрытия (eveningInside).
-        Порядок приоритета заполнения: level6 (директор) → level5 → level4.
-        Директор п.9: предпочтительна вечерняя смена закрытия (eveningInside).
-        П.4: соблюдаем ротацию 2У+2В из плана.
+        П.2: менеджеры на окладе — лидеры смен открытия/закрытия.
+        П.14: на праздничные дни с двойной оплатой level4-5 ТОЛЬКО morningInside/eveningInside
+              (rdm/office/sw запрещены).
         """
-        # Формируем пулы по приоритету
         level6_emps = [e for e in self.by_level.get('level6', []) if e.get('canInside')]
         level5_emps = [e for e in self.by_level.get('level5', []) if e.get('canInside')]
         level4_emps = [e for e in self.by_level.get('level4', []) if e.get('canInside')]
@@ -510,10 +497,10 @@ class Scheduler:
             return
 
         names   = [e['name'] for e in inside_emps]
-        m_count = {n: 0 for n in names}  # кол-во morningInside в неделе
-        e_count = {n: 0 for n in names}  # кол-во eveningInside в неделе
-        r_count = {n: 0 for n in names}  # кол-во rdm в неделе
-        total   = {n: 0 for n in names}  # всего смен в неделе
+        m_count = {n: 0 for n in names}
+        e_count = {n: 0 for n in names}
+        r_count = {n: 0 for n in names}
+        total   = {n: 0 for n in names}
         TARGET  = 5
 
         sorted_days = sorted(d for d in week if d.month == month)
@@ -522,7 +509,6 @@ class Scheduler:
             return any(schedule[d].get(sl) == name for sl in SLOTS)
 
         def had_evening_prev(name, d):
-            """П.5: запрет вечер→утро (13ч интервал)."""
             prev = d - timedelta(days=1)
             if prev not in schedule: return False
             return any(schedule[prev].get(sl) == name for sl in EVENING_SLOTS)
@@ -531,7 +517,6 @@ class Scheduler:
             return [x for x in work_map.get(emp_name, []) if x > after_d and x.month == month]
 
         def wants_morning(emp, d):
-            """П.4: хочет ли сотрудник утро в этот день согласно плану?"""
             return plan.get(emp['name'], {}).get(d) == 'morning'
 
         def pick_inside(candidates, d, count_dict, soft_cap, is_morning):
@@ -541,33 +526,29 @@ class Scheduler:
                 if is_morning and had_evening_prev(e['name'], d): return False
                 return True
 
-            # П.4: сначала кандидаты, у которых план совпадает с типом смены
-            plan_match = [e for e in candidates if ok(e) and count_dict[e['name']] < soft_cap
-                          and (wants_morning(e, d) == is_morning)]
-            if not plan_match:
-                plan_match = [e for e in candidates if ok(e) and count_dict[e['name']] < soft_cap]
-            if not plan_match:
-                plan_match = [e for e in candidates if ok(e) and count_dict[e['name']] < soft_cap + 1]
-            if not plan_match:
+            pool = [e for e in candidates if ok(e) and count_dict[e['name']] < soft_cap
+                    and (wants_morning(e, d) == is_morning)]
+            if not pool:
+                pool = [e for e in candidates if ok(e) and count_dict[e['name']] < soft_cap]
+            if not pool:
+                pool = [e for e in candidates if ok(e) and count_dict[e['name']] < soft_cap + 1]
+            if not pool:
                 return None
 
             def sort_key(e):
-                fd  = future_days(e['name'], d)
+                fd = future_days(e['name'], d)
                 needed  = max(0, soft_cap - count_dict[e['name']])
                 urgency = max(0, needed - len(fd))
                 return (count_dict[e['name']], -urgency, total[e['name']])
 
-            plan_match.sort(key=sort_key)
-            return plan_match[0]
+            pool.sort(key=sort_key)
+            return pool[0]
 
-        # Pass 1: основной проход по дням
         for d in sorted_days:
             s = schedule[d]
             workers = [e for e in inside_emps if d in work_map.get(e['name'], [])]
 
             if not s['morningInside']:
-                # Директор (level6) предпочитает вечернюю (п.9), поэтому на утро ставим level5/level4 первыми
-                # Но если level5/4 нет — директор тоже может
                 non_director = [e for e in workers if e.get('level') != 'level6']
                 pool = non_director if non_director else workers
                 emp = pick_inside(pool, d, m_count, 2, is_morning=True)
@@ -576,7 +557,6 @@ class Scheduler:
                     m_count[emp['name']] += 1; total[emp['name']] += 1
 
             if not s['eveningInside']:
-                # Директор п.9: вечернюю смену закрытия — предпочтительно директор
                 director_avail = [e for e in workers if e.get('level') == 'level6']
                 if director_avail:
                     emp = pick_inside(director_avail, d, e_count, 2, is_morning=False)
@@ -588,11 +568,13 @@ class Scheduler:
                     s['eveningInside'] = emp['name']
                     e_count[emp['name']] += 1; total[emp['name']] += 1
 
-        # Pass 2: RDM (один раз в неделю, только если есть незакрытые смены)
+        # Pass 2: RDM — только в НЕ праздничные дни для level4-5 (П.14)
         for emp in sorted(inside_emps, key=lambda e: total[e['name']]):
-            if emp.get('level') == 'level6': continue  # директор в RDM не ставится
+            if emp.get('level') == 'level6': continue
             if r_count[emp['name']] > 0 or total[emp['name']] >= TARGET: continue
             for d in reversed(sorted_days):
+                # П.14: на праздничные дни level4-5 — только shift leading
+                if is_holiday(d): continue
                 if d not in work_map.get(emp['name'], []): continue
                 s = schedule[d]
                 if not s['rdm'] and not on_day(emp['name'], d):
@@ -600,25 +582,25 @@ class Scheduler:
                     r_count[emp['name']] += 1; total[emp['name']] += 1
                     break
 
-        # Pass 3: добираем до 5 смен
+        # Pass 3: добираем до 5 смен (кроме праздников — только inside)
         for emp in sorted(inside_emps, key=lambda e: total[e['name']]):
             if total[emp['name']] >= TARGET: continue
             for d in sorted_days:
                 if total[emp['name']] >= TARGET: break
                 if d not in work_map.get(emp['name'], []) or on_day(emp['name'], d): continue
                 s = schedule[d]
+                holiday = is_holiday(d)
                 if not s['morningInside'] and m_count[emp['name']] < 3 and not had_evening_prev(emp['name'], d):
                     s['morningInside'] = emp['name']
                     m_count[emp['name']] += 1; total[emp['name']] += 1
                 elif not s['eveningInside'] and e_count[emp['name']] < 3:
                     s['eveningInside'] = emp['name']
                     e_count[emp['name']] += 1; total[emp['name']] += 1
-                elif emp.get('level') != 'level6' and not s['rdm'] and r_count[emp['name']] < 1:
+                elif not holiday and emp.get('level') != 'level6' and not s['rdm'] and r_count[emp['name']] < 1:
                     s['rdm'] = emp['name']
                     r_count[emp['name']] += 1; total[emp['name']] += 1
 
-        # Pass 4: emergency fill — обязательные слоты без ограничения по 5 смен/нед
-        # (обязательное покрытие важнее лимита)
+        # Pass 4: emergency — обязательные слоты без cap
         for d in sorted_days:
             s = schedule[d]
             workers_week = [e for e in inside_emps if d in work_map.get(e['name'], [])]
@@ -627,12 +609,9 @@ class Scheduler:
             if not s['morningInside']:
                 cands = [e for e in workers_week if not on_day(e['name'], d)
                          and not had_evening_prev(e['name'], d)]
-                if not cands:
-                    cands = [e for e in workers_week if not on_day(e['name'], d)]
-                if not cands:
-                    cands = [e for e in workers_any if not had_evening_prev(e['name'], d)]
-                if not cands:
-                    cands = workers_any
+                if not cands: cands = [e for e in workers_week if not on_day(e['name'], d)]
+                if not cands: cands = [e for e in workers_any if not had_evening_prev(e['name'], d)]
+                if not cands: cands = workers_any
                 if cands:
                     cands.sort(key=lambda e: (m_count.get(e['name'],0), total.get(e['name'],0)))
                     emp = cands[0]
@@ -642,8 +621,7 @@ class Scheduler:
 
             if not s['eveningInside']:
                 cands = [e for e in workers_week if not on_day(e['name'], d)]
-                if not cands:
-                    cands = workers_any
+                if not cands: cands = workers_any
                 if cands:
                     cands.sort(key=lambda e: (e_count.get(e['name'],0), total.get(e['name'],0)))
                     emp = cands[0]
@@ -652,12 +630,8 @@ class Scheduler:
                     total[emp['name']]   = total.get(emp['name'],0)   + 1
 
     def _assign_director_office(self, emp, work_days, schedule):
-        """
-        После назначения inside-смен — ставим директора в 'office' на оставшихся рабочих днях.
-        Это представляет административную работу (RDM, SCH, Work Flow) по п.11 политики.
-        """
+        """После inside-смен — office для директора (административная работа)."""
         for d in work_days:
-            # Только если директор уже не назначен на inside-смену в этот день
             already_on = any(schedule[d].get(s) == emp['name']
                              for s in ('morningInside', 'eveningInside', 'rdm'))
             if not already_on and not schedule[d]['office']:
@@ -665,7 +639,8 @@ class Scheduler:
 
     def _assign_managers(self, week, schedule, work_map, week_idx, month, plan):
         """
-        П.4: level3 менеджеры — morningManager / eveningManager по плану 2У+2В.
+        П.4: level3 — morningManager/eveningManager по ротации 2У+2В.
+        П.14: на праздничные дни level3 управляет участками (morningManager/eveningManager).
         П.5: запрет вечер→утро.
         П.7: макс 5 смен/нед.
         """
@@ -673,7 +648,7 @@ class Scheduler:
 
         def shifts_this_week(name):
             return sum(
-                1 for d in week for s in ('morningManager', 'eveningManager', 'sw', 'night', 'night2')
+                1 for d in week for s in ('morningManager','eveningManager','sw','night','night2')
                 if d.month == month and schedule[d].get(s) == name
             )
 
@@ -690,7 +665,6 @@ class Scheduler:
             prev_d = d - timedelta(days=1)
             avail = [m for m in managers if d in work_map.get(m['name'], [])]
 
-            # П.4: сортируем — первыми те, у кого план совпадает с нужным типом
             def sort_by_plan(mgrs, slot_type):
                 def key(m):
                     plan_type = plan.get(m['name'], {}).get(d)
@@ -698,7 +672,6 @@ class Scheduler:
                     return (match, shifts_this_week(m['name']))
                 return sorted(mgrs, key=key)
 
-            # morningManager
             if not schedule[d]['morningManager']:
                 for m in sort_by_plan(avail, 'morning'):
                     if shifts_this_week(m['name']) >= 5: continue
@@ -711,7 +684,6 @@ class Scheduler:
                     schedule[d]['morningManager'] = m['name']
                     break
 
-            # eveningManager
             if not schedule[d]['eveningManager']:
                 for m in sort_by_plan(avail, 'evening'):
                     if shifts_this_week(m['name']) >= 5: continue
@@ -724,35 +696,28 @@ class Scheduler:
                     break
 
     def _assign_managers_emergency(self, week, schedule, work_map, month):
-        """Emergency pass: заполняем пустые morningManager/eveningManager без лимита 5 смен/нед."""
+        """Emergency: заполняем пустые morningManager/eveningManager без лимита 5 смен."""
         managers = self.by_level.get('level3', []) + self.by_level.get('level2', [])
-        if not managers:
-            return
+        if not managers: return
 
         for d in week:
-            if d.month != month:
-                continue
+            if d.month != month: continue
             prev_d = d - timedelta(days=1)
 
-            # morningManager emergency
             if not schedule[d]['morningManager']:
                 cands = [m for m in managers
                          if not any(schedule[d].get(s) == m['name'] for s in SLOTS)]
-                # Убираем тех, у кого был вечер вчера (п.5 — 13ч интервал)
                 cands_ok = [m for m in cands
                             if not (prev_d in schedule and
                                     any(schedule[prev_d].get(s) == m['name'] for s in EVENING_SLOTS))]
-                if not cands_ok:
-                    cands_ok = cands  # крайний случай — игнорируем запрет вечер→утро
+                if not cands_ok: cands_ok = cands
                 if cands_ok:
-                    # Выбираем того, кто меньше всего работал на этой неделе
                     cands_ok.sort(key=lambda m: sum(
                         1 for dd in week for sl in ('morningManager','eveningManager','sw','night','night2')
                         if dd.month == month and schedule[dd].get(sl) == m['name']
                     ))
                     schedule[d]['morningManager'] = cands_ok[0]['name']
 
-            # eveningManager emergency
             if not schedule[d]['eveningManager']:
                 cands = [m for m in managers
                          if not any(schedule[d].get(s) == m['name'] for s in SLOTS)]
@@ -765,20 +730,19 @@ class Scheduler:
 
     def _assign_nights(self, week, schedule, work_map, prev_nights, month):
         """
-        П.1 стр.1: ночными управляет менеджер уровня не ниже ПБО (level3).
-        Макс 2 ночных в неделю на человека. Не превышать 5 смен/нед.
+        П.1: ночные — level3+.
+        П.14: ночь перед праздником — level3 (уже выполняется, т.к. night pool = level3).
         """
         night_pool = self.by_level.get('level3', []) + self.by_level.get('level2', [])
         if not night_pool: return
 
         def nights_this_week(name):
             return sum(1 for d in week if d.month == month
-                       and (schedule[d].get('night') == name
-                            or schedule[d].get('night2') == name))
+                       and (schedule[d].get('night') == name or schedule[d].get('night2') == name))
 
         def shifts_this_week(name):
             return sum(
-                1 for d in week for s in ('morningManager', 'eveningManager', 'sw', 'night', 'night2')
+                1 for d in week for s in ('morningManager','eveningManager','sw','night','night2')
                 if d.month == month and schedule[d].get(s) == name
             )
 
@@ -801,13 +765,13 @@ class Scheduler:
                     prev_nights[emp['name']].add(d.strftime('%Y-%m-%d'))
 
     def _assign_sw(self, week, schedule, work_map, month):
-        """SW (Supervisory Watch) — только level3, только когда все обязательные слоты закрыты."""
+        """SW — только level3, только когда обязательные слоты закрыты, не в праздники."""
         sw_pool = self.by_level.get('level3', [])
         sw_week = {e['name']: 0 for e in sw_pool}
 
         def shifts_this_week(name):
             return sum(
-                1 for d in week for s in ('morningManager', 'eveningManager', 'sw', 'night', 'night2')
+                1 for d in week for s in ('morningManager','eveningManager','sw','night','night2')
                 if d.month == month and schedule[d].get(s) == name
             )
 
@@ -815,6 +779,8 @@ class Scheduler:
             if d.month != month: continue
             if schedule[d]['sw']: continue
             if not all(schedule[d].get(s) for s in self.MANDATORY): continue
+            # П.14: в праздники SW не планируется
+            if is_holiday(d): continue
             occupied = {v for k, v in schedule[d].items() if v}
             cands = [
                 e for e in sw_pool
@@ -831,8 +797,8 @@ class Scheduler:
 
     def _enforce_january_holiday_limit(self, week, schedule):
         """
-        П.14: в январские праздники (1–8 января) — не более 3 смен за весь период
-        для каждого сотрудника на окладе.
+        П.14: в период 1-8 января — не более 3 смен СУММАРНО за весь период.
+        Счёт ведётся накопительно через self._jan_holiday_shifts.
         """
         holiday_days = [
             d for d in week
@@ -841,25 +807,29 @@ class Scheduler:
         if not holiday_days: return
 
         salary_emps = [e for e in self.employees if e.get('level') in self.SALARY_LEVELS]
+        low_priority = ['sw', 'rdm', 'office', 'night2', 'night']
+
         for emp in salary_emps:
             name = emp['name']
-            # Считаем все смены в праздничный период (включая предыдущие недели января)
-            # Здесь обрабатываем только текущую неделю — в week могут быть не все праздники
-            shifts_in_holidays = sum(
+            # Добавляем новые смены этой недели в накопительный счёт
+            new_shifts = sum(
                 1 for d in holiday_days
                 for s in SLOTS if schedule[d].get(s) == name
             )
-            # Если превышает 3 — убираем лишние (низкоприоритетные сначала)
-            # Удаляем только НЕобязательные слоты — mandatory слоты (morningInside/eveningInside/
-            # morningManager/eveningManager) трогать нельзя, ПБО должен быть закрыт
-            low_priority = ['sw', 'rdm', 'office', 'night2', 'night']
-            for d in holiday_days:
-                if shifts_in_holidays <= 3: break
+            self._jan_holiday_shifts[name] = self._jan_holiday_shifts.get(name, 0) + new_shifts
+
+            # Убираем лишние (от конца к началу, только низкоприоритетные)
+            over = self._jan_holiday_shifts[name] - 3
+            if over <= 0: continue
+
+            for d in reversed(holiday_days):
+                if over <= 0: break
                 for slot in low_priority:
+                    if over <= 0: break
                     if schedule[d].get(slot) == name:
                         schedule[d][slot] = ''
-                        shifts_in_holidays -= 1
-                        break
+                        self._jan_holiday_shifts[name] -= 1
+                        over -= 1
 
 
 # ─── Startup ──────────────────────────────────────────────────────────────────
