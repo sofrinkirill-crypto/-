@@ -299,25 +299,33 @@ class Scheduler:
         if not month_days:
             return
 
+        # ШАГ 1: предварительный work_map (все дни — рабочие) для назначения ночных
+        base_work_map = {emp['name']: [d for d in week if d.month == month]
+                         for emp in self.employees}
+
+        # ШАГ 2: назначаем ночные ПЕРВЫМИ — теперь знаем кто когда работает ночь
+        self._assign_nights(week, schedule, base_work_map, prev_nights, month, week_idx)
+
+        # ШАГ 3: выходные с учётом П.10 (ночь N → день N+1 = 1 из 2 выходных)
         work_map = {}
         for emp in self.employees:
-            off = self._off_days(emp, week, prev_nights, month, weekend_done, week_idx)
+            off = self._off_days(emp, week, prev_nights, month, weekend_done, week_idx,
+                                  current_schedule=schedule)
             work_map[emp['name']] = [d for d in week if d not in off and d.month == month]
 
         plan = self._build_rotation_plan(work_map, week, week_idx, month)
 
+        # ШАГ 4: остальные смены
         self._assign_all_inside(week, week_idx, work_map, schedule, month, plan)
         self._assign_managers(week, schedule, work_map, week_idx, month, plan)
-        self._assign_managers_emergency(week, schedule, work_map, month)
-        self._assign_nights(week, schedule, work_map, prev_nights, month)
-        # П.10: work_map считался ДО назначения ночных → чистим конфликты вручную
-        self._enforce_night_rest(week, schedule, month)
-        # Заново заполняем слоты, опустевшие после очистки
         self._assign_managers_emergency(week, schedule, work_map, month)
         self._assign_sw(week, schedule, work_map, month)
 
         for emp in self.by_level.get('level6', []):
             self._assign_director_office(emp, work_map[emp['name']], schedule)
+
+        # Финальный проход: добираем до 5 смен для level3
+        self._fill_to_target_shifts(week, schedule, work_map, month)
 
         # П.14: январские праздники — накопительный лимит 3 смены
         if month == 1:
@@ -345,27 +353,47 @@ class Scheduler:
 
     # ── Off-day calculation ───────────────────────────────────────────────────
 
-    def _off_days(self, emp, week, prev_nights, month, weekend_done, week_idx):
+    def _off_days(self, emp, week, prev_nights, month, weekend_done, week_idx,
+                   current_schedule=None):
         emp_req = self.requests.get(emp['name'], {})
         forced = set()
+        name = emp['name']
 
         for d in week:
             if emp_req.get(d.strftime('%Y-%m-%d')) in ('off', 'vacation'):
                 forced.add(d)
 
-        # П.10/9: после ночной — выходные
-        night_dates = prev_nights.get(emp['name'], set())
+        # Дни ночных смен ТЕКУЩЕЙ недели (из current_schedule, не prev_nights)
+        current_week_nights = set()
+        if current_schedule:
+            for d in week:
+                for slot in ('night', 'night2'):
+                    if current_schedule[d].get(slot) == name:
+                        current_week_nights.add(d)
+
+        # П.10: после ночной текущей недели → следующий день ОБЯЗАТЕЛЬНЫЙ выходной
+        for nd in current_week_nights:
+            next_d = nd + timedelta(days=1)
+            if next_d in week:
+                forced.add(next_d)
+
+        # П.10: после ночной ПРОШЛЫХ недель (только первый день — обязательный)
+        # Исключаем текущую неделю чтобы не считать дважды
+        current_week_strs = {d.strftime('%Y-%m-%d') for d in week}
+        night_dates = prev_nights.get(name, set()) - current_week_strs
         for d in week:
             prev = (d - timedelta(days=1)).strftime('%Y-%m-%d')
             if prev in night_dates:
                 forced.add(d)
-                next_d = d + timedelta(days=1)
-                if next_d in week:
-                    forced.add(next_d)
 
-        # П.6: Сб+Вс выходные
+        # П.6: Сб+Вс выходные — НЕ совмещаем с ночной неделей (П.10 уже занял 1 выходной)
+        has_p10_this_week = any(
+            (current_schedule and current_schedule[d2].get('night') == name or
+             current_schedule and current_schedule[d2].get('night2') == name)
+            for d2 in week if d2.month == month
+        ) if current_schedule else False
         max_weekends = 2 if emp.get('level') == 'level6' else 1
-        if emp.get('level') in self.SALARY_LEVELS:
+        if emp.get('level') in self.SALARY_LEVELS and not has_p10_this_week:
             target_weeks = self._weekend_target_weeks.get(emp['name'], [])
             if weekend_done.get(emp['name'], 0) < max_weekends and week_idx in target_weeks:
                 sat = next((d for d in week if d.weekday() == 5 and d.month == month), None)
@@ -600,7 +628,7 @@ class Scheduler:
                         s['eveningInside'] = emp['name']
                         e_count[emp['name']] += 1; total[emp['name']] += 1
                         if is_dir: self._dir_inside_month += 1
-                elif not holiday and emp.get('level') != 'level6' and not s['rdm'] and r_count[emp['name']] < 1:
+                elif not holiday and emp.get('level') != 'level6' and not s['rdm'] and r_count[emp['name']] < 2:
                     s['rdm'] = emp['name']
                     r_count[emp['name']] += 1; total[emp['name']] += 1
 
@@ -706,6 +734,12 @@ class Scheduler:
             return sum(1 for d in week if d.month == month
                        and schedule[d].get('eveningManager') == name)
 
+        def shifts_week_total(name):
+            return sum(
+                1 for d2 in week for s in SLOTS
+                if d2.month == month and schedule[d2].get(s) == name
+            )
+
         for d in week:
             if d.month != month: continue
             prev_d = d - timedelta(days=1)
@@ -715,7 +749,8 @@ class Scheduler:
                 def key(m):
                     plan_type = plan.get(m['name'], {}).get(d)
                     match = 1 if plan_type == slot_type else 2
-                    return (match, shifts_this_week(m['name']))
+                    # Приоритет: сначала у кого меньше смен, затем план ротации
+                    return (shifts_this_week(m['name']), match)
                 return sorted(mgrs, key=key)
 
             if not schedule[d]['morningManager']:
@@ -776,26 +811,31 @@ class Scheduler:
                     ))
                     schedule[d]['eveningManager'] = cands[0]['name']
 
-    def _assign_nights(self, week, schedule, work_map, prev_nights, month):
+    def _assign_nights(self, week, schedule, work_map, prev_nights, month, week_idx=0):
         """
-        П.1: ночные — level3+.
-        П.14: ночь перед праздником — level3 (уже выполняется, т.к. night pool = level3).
+        П.1: ночные — level3.
+        П.3: не более 2 ночных в месяц, не более 1 ночной в неделю.
+        П.10: предпочитаем людей, у которых следующий день уже выходной (П.10 "бесплатен").
         """
         night_pool = self.by_level.get('level3', []) + self.by_level.get('level2', [])
         if not night_pool: return
 
         def nights_this_week(name):
-            return sum(1 for d in week if d.month == month
-                       and (schedule[d].get('night') == name or schedule[d].get('night2') == name))
+            return sum(1 for d2 in week if d2.month == month
+                       and (schedule[d2].get('night') == name or schedule[d2].get('night2') == name))
+
+        def nights_this_month(name):
+            return len(prev_nights.get(name, set()))
 
         def shifts_this_week(name):
             return sum(
-                1 for d in week for s in ('morningManager','eveningManager','sw','night','night2')
-                if d.month == month and schedule[d].get(s) == name
+                1 for d2 in week for s in ('morningManager','eveningManager','sw','night','night2')
+                if d2.month == month and schedule[d2].get(s) == name
             )
 
         for d in week:
             if d.month != month: continue
+            next_d = d + timedelta(days=1)
             for slot in ('night', 'night2'):
                 if schedule[d][slot]: continue
                 occupied = {v for k, v in schedule[d].items() if v}
@@ -803,14 +843,21 @@ class Scheduler:
                     e for e in night_pool
                     if e['name'] not in occupied
                     and d in work_map.get(e['name'], [])
-                    and nights_this_week(e['name']) < 2
+                    and nights_this_week(e['name']) < 1      # П.3: max 1 ночь в неделю
+                    and nights_this_month(e['name']) < 2     # П.3: max 2 ночи в месяц
                     and shifts_this_week(e['name']) < 5
+                    # П.6: не ставим ночь в неделю Сб+Вс выходного (иначе 3 выходных)
+                    and week_idx not in self._weekend_target_weeks.get(e['name'], [])
                 ]
-                cands.sort(key=lambda e: (nights_this_week(e['name']), shifts_this_week(e['name'])))
-                if cands:
-                    emp = cands[0]
-                    schedule[d][slot] = emp['name']
-                    prev_nights[emp['name']].add(d.strftime('%Y-%m-%d'))
+                if not cands: continue
+                # Приоритет: кандидаты, у которых следующий день уже выходной (П.10 "бесплатен")
+                free_p10 = [e for e in cands if next_d not in work_map.get(e['name'], [])]
+                ordered = free_p10 + [e for e in cands if e not in free_p10]
+                ordered.sort(key=lambda e: (0 if next_d not in work_map.get(e['name'],[]) else 1,
+                                            nights_this_month(e['name']), shifts_this_week(e['name'])))
+                emp = ordered[0]
+                schedule[d][slot] = emp['name']
+                prev_nights[emp['name']].add(d.strftime('%Y-%m-%d'))
 
 
     def _had_night_before(self, name, d, schedule, days=1):
@@ -850,6 +897,93 @@ class Scheduler:
                         if s not in mandatory and schedule[next2_d].get(s) == name:
                             schedule[next2_d][s] = ''
 
+    def _fill_to_target_shifts(self, week, schedule, work_map, month):
+        """
+        Финальный проход: все level2-5 должны иметь не менее TARGET смен в неделю.
+        Если кто-то меньше — добавляем смены на свободные слоты в рамках work_map.
+        Level3: пробует morningManager, eveningManager, sw.
+        Level5/4: пробует rdm, sw (дополнительные).
+        """
+        TARGET = 5
+        # Все кроме директора
+        candidates = [e for e in self.employees if e.get('level') != 'level6']
+        month_days = [d for d in week if d.month == month]
+
+        def p10_days(name):
+            result = set()
+            for d in month_days:
+                if schedule[d].get('night') == name or schedule[d].get('night2') == name:
+                    result.add(d + timedelta(days=1))
+            return result
+
+        def mandatory_filled(d):
+            return all(schedule[d].get(s) for s in self.MANDATORY)
+
+        for emp in sorted(candidates, key=lambda e: sum(
+                1 for d in month_days if any(schedule[d].get(s)==e['name'] for s in SLOTS))):
+            name = emp['name']
+            p10 = p10_days(name)
+            shifts = [d for d in month_days if any(schedule[d].get(s) == name for s in SLOTS)]
+            if len(shifts) >= TARGET: continue
+
+            level = emp.get('level', '')
+            if level == 'level3':
+                try_slots = ['morningManager', 'eveningManager', 'sw']
+            else:
+                try_slots = ['rdm', 'sw']
+
+            for d in month_days:
+                if len(shifts) >= TARGET: break
+                if d not in work_map.get(name, []): continue
+                if d in p10: continue
+                if any(schedule[d].get(s) == name for s in SLOTS): continue
+                if not mandatory_filled(d) and 'sw' in try_slots: 
+                    try_slots_d = [s for s in try_slots if s != 'sw']
+                else:
+                    try_slots_d = try_slots
+                for slot in try_slots_d:
+                    if slot in ('morningManager', 'eveningManager', 'rdm', 'sw') and not schedule[d].get(slot):
+                        if slot == 'sw' and not mandatory_filled(d): continue
+                        schedule[d][slot] = name
+                        shifts.append(d)
+                        break
+
+
+    def _compensate_night_rest_losses(self, week, schedule, work_map, month):
+        """
+        После _enforce_night_rest некоторые сотрудники теряют смену (остаются с 4 вместо 5).
+        Находим их и добавляем смену в день, который:
+          - не является П.10-вынужденным выходным (day after night)
+          - не является их запланированным выходным
+          - имеет свободный обязательный слот
+        """
+        for emp in self.employees:
+            if emp.get('level') == 'level6': continue
+            name = emp['name']
+            month_days = [d for d in week if d.month == month]
+            shifts = [d for d in month_days if any(schedule[d].get(s) == name for s in SLOTS)]
+            if len(shifts) >= 5: continue
+
+            # П.10 дни — день после ночи (нельзя трогать)
+            p10_days = set()
+            for d in month_days:
+                if schedule[d].get('night') == name or schedule[d].get('night2') == name:
+                    p10_days.add(d + timedelta(days=1))
+
+            # Дни без смены, не П.10, не запланированный выходной (есть в work_map)
+            free_days = [d for d in month_days
+                         if d not in p10_days
+                         and not any(schedule[d].get(s) == name for s in SLOTS)
+                         and d in work_map.get(name, [])]
+
+            for d in free_days:
+                if len(shifts) >= 5: break
+                for slot in ('morningManager', 'eveningManager'):
+                    if not schedule[d].get(slot):
+                        schedule[d][slot] = name
+                        shifts.append(d)
+                        break
+
     def _assign_sw(self, week, schedule, work_map, month):
         """SW — только level3, только когда обязательные слоты закрыты, не в праздники."""
         sw_pool = self.by_level.get('level3', [])
@@ -877,7 +1011,7 @@ class Scheduler:
                 and not self._had_night_before(e['name'], d, schedule, 2)
             ]
             if cands:
-                cands.sort(key=lambda e: sw_week[e['name']])
+                cands.sort(key=lambda e: (shifts_this_week(e['name']), sw_week[e['name']]))
                 emp = cands[0]
                 schedule[d]['sw'] = emp['name']
                 sw_week[emp['name']] += 1
