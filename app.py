@@ -517,6 +517,33 @@ class Scheduler:
                     s['rdm'] = emp['name']
                     r_count[emp['name']] += 1; total[emp['name']] += 1
 
+        # ── Pass 4: mandatory-slot emergency — fill empty mI/eI ignoring caps ──
+        # If morningInside or eveningInside is still empty after all passes,
+        # assign whoever is available that day, ignoring per-type caps.
+        # evening→morning constraint is relaxed as last resort.
+        for d in sorted_days:
+            s = schedule[d]
+            workers = [e for e in inside_emps if d in work_map.get(e['name'], [])]
+
+            if not s['morningInside']:
+                # prefer not violating evening→morning, but allow as last resort
+                candidates = [e for e in workers if not on_day(e['name'], d) and not had_evening_prev(e['name'], d)]
+                if not candidates:
+                    candidates = [e for e in workers if not on_day(e['name'], d)]
+                if candidates:
+                    candidates.sort(key=lambda e: (m_count[e['name']], total[e['name']]))
+                    emp = candidates[0]
+                    s['morningInside'] = emp['name']
+                    m_count[emp['name']] += 1; total[emp['name']] += 1
+
+            if not s['eveningInside']:
+                candidates = [e for e in workers if not on_day(e['name'], d)]
+                if candidates:
+                    candidates.sort(key=lambda e: (e_count[e['name']], total[e['name']]))
+                    emp = candidates[0]
+                    s['eveningInside'] = emp['name']
+                    e_count[emp['name']] += 1; total[emp['name']] += 1
+
     def _assign_office(self, emp, work_days, schedule):
         count = 0
         for d in work_days:
