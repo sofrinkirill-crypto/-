@@ -42,15 +42,34 @@
         }
 
         /* JS moved out of <style> to avoid CSS parse errors. See <script> below. */
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--bg); min-height: 100vh; padding: 50px 20px 20px 20px; color: var(--text); }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .header { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 30px; padding: 20px; }
-        .header .icon { opacity: 0.7; }
-        .header h1 { color: var(--text); font-size: 1.6rem; font-weight: 700; letter-spacing: -0.3px; margin: 0; }
-        .main-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; }
-        .sidebar { display: flex; flex-direction: column; gap: 20px; }
-        .card { background: var(--surface); border-radius: var(--radius); padding: var(--card-padding); box-shadow: var(--elev-1); border: 1px solid rgba(232,238,245,0.8); transition: all 0.18s ease; }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif; background: var(--bg); min-height: 100vh; padding: 16px 20px 20px 20px; color: var(--text); }
+        .container { max-width: 1600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+        .topbar { background: #1c1c1e; border-radius: var(--radius); box-shadow: 0 2px 12px rgba(0,0,0,0.2); padding: 0 20px; display: flex; align-items: center; height: 58px; flex-wrap: nowrap; overflow: hidden; gap: 0; }
+        .topbar-title { display: flex; align-items: center; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 18px; height: 100%; flex-shrink: 0; }
+        .topbar-title .t-icon { width: 30px; height: 30px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .topbar-title-text { display: flex; flex-direction: column; gap: 1px; }
+        .topbar-title-text .t-main { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.3px; line-height: 1; }
+        .topbar-title-text .t-sub { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 500; line-height: 1; }
+        .topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); flex-shrink: 0; margin: 0 14px; }
+        .topbar-selects { display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
+        .topbar-select-group { display: flex; align-items: center; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; }
+        .topbar-select-group label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); white-space: nowrap; padding: 0 5px 0 10px; pointer-events: none; text-transform: uppercase; letter-spacing: .5px; }
+        .topbar-select-group select { padding: 6px 26px 6px 2px; font-size: 13px; font-weight: 600; border: none; background: transparent; color: #fff; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 5px center; background-size: 13px; }
+        .topbar-select-group select option { background: #2c2c2e; color: #fff; }
+        .topbar-actions { display: flex; gap: 3px; align-items: center; margin-left: auto; flex-shrink: 0; }
+        .topbar-actions .btn { font-size: 12px; font-weight: 600; padding: 7px 13px; border-radius: 9px; gap: 6px; }
+        .topbar-actions .btn .icon { display: block; width: 14px; height: 14px; flex-shrink: 0; }
+        .topbar-actions .btn-primary { background: #fff; color: #1c1c1e; border-color: transparent; }
+        .topbar-actions .btn-primary:hover { background: #e5e5ea; }
+        .topbar-actions .btn-primary .icon { filter: brightness(0); }
+        .topbar-actions .btn-ghost { color: rgba(255,255,255,0.7); border-color: transparent; background: transparent; }
+        .topbar-actions .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .topbar-actions .btn-ghost .icon { filter: brightness(0) invert(1); opacity: 0.7; }
+        .topbar-alerts { display: flex; gap: 8px; align-items: center; }
+        .main-layout { display: flex; flex-direction: column; }
+        .sidebar { display: none; }
+        .card { background: var(--surface); border-radius: var(--radius); padding: var(--card-padding); box-shadow: 0 2px 8px rgba(16,24,40,0.05); border: 1px solid rgba(232,238,245,0.8); transition: box-shadow 0.18s ease; }
+        .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
         .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 14px; color: #1d1d1f; display: flex; align-items: center; letter-spacing: -0.3px; gap:10px }
         .card-title .icon { width: 20px; height: 20px; margin-right: 12px; opacity: 0.8; background-size: contain; background-repeat: no-repeat; background-position: center; }
         .form-group { margin-bottom: 20px; }
@@ -61,12 +80,15 @@
         .btn-toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
         .btn-toolbar .btn { flex: 1 1 auto; min-width: 120px; }
         @media (max-width: 480px) { .btn-toolbar { flex-direction: column; align-items: stretch; } .btn-toolbar .btn { width: 100%; } }
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; border: 1px solid rgba(16,24,40,0.1); border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.14s ease, box-shadow 0.14s ease, transform 0.08s ease; font-family: inherit; letter-spacing: -0.2px; background: var(--neutral-0); color: var(--text); }
-        .btn:hover { background: var(--neutral-100); box-shadow: 0 4px 12px rgba(16,24,40,0.06); }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 13px; border: 1px solid rgba(16,24,40,0.1); border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease; font-family: inherit; letter-spacing: -0.1px; background: var(--neutral-0); color: var(--text); white-space: nowrap; }
+        .btn:hover { background: var(--neutral-100); box-shadow: 0 1px 4px rgba(16,24,40,0.06); }
         .btn:active { transform: translateY(1px); }
         .btn-primary { background: var(--primary); color: #fff; border-color: transparent; }
-        .btn-primary:hover { background: #2E2E2E; box-shadow: 0 6px 18px rgba(33,33,33,0.14); }
+        .btn-primary:hover { background: #2E2E2E; box-shadow: 0 2px 8px rgba(33,33,33,0.15); }
         .btn-primary .icon { filter: brightness(0) invert(1); }
+        .btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
+        .btn-ghost:hover { background: rgba(0,0,0,0.05); color: var(--text); }
+        .btn-ghost .icon { opacity: 0.6; }
         .btn-secondary { background: var(--neutral-0); color: var(--text); }
         .btn-secondary .icon { opacity: 0.7; }
         .btn-info { background: var(--color-green); color: #fff; border-color: transparent; }
@@ -77,7 +99,7 @@
         .btn-warning .icon { filter: brightness(0) invert(1); }
         .btn-danger { background: var(--color-red); color: #fff; border-color: transparent; }
         .btn-danger .icon { filter: brightness(0) invert(1); }
-        .btn:focus { outline: none; box-shadow: 0 0 0 6px rgba(var(--accent-rgb),0.08); }
+        .btn:focus { outline: none; box-shadow: 0 0 0 4px rgba(var(--accent-rgb),0.08); }
         .btn .icon { width: 16px; height: 16px; background-size: contain; background-repeat: no-repeat; background-position: center; display: inline-block; flex-shrink: 0; }
         .icon { display: inline-block; width: 18px; height: 18px; background-size: contain; background-repeat: no-repeat; background-position: center; vertical-align: middle; flex-shrink: 0; }
         .icon-save { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'/%3E%3Cpath d='M17 21v-8H7v8'/%3E%3Cpath d='M7 3v5h6'/%3E%3C/svg%3E") no-repeat center; }
@@ -85,13 +107,49 @@
         .btn-toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
         .btn-small { padding: 10px 14px; font-size: 14px; border-radius: 10px; }
         .icon-calculator { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V18zm2.498-6.75h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V13.5zm0 2.25h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V18zm2.504-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V18zm2.498-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zM8.25 6h7.5v2.25h-7.5V6zM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.65 4.5 4.757V19.5a2.25 2.25 0 002.25 2.25h10.5a2.25 2.25 0 002.25-2.25V4.757c0-1.108-.806-2.057-1.907-2.185A48.507 48.507 0 0012 2.25z'/%3E%3C/svg%3E") no-repeat center; }
-        .schedule-section { background: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.05); border: 1px solid #e8eef5; }
+        .schedule-section { background: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eef5; }
         .schedule-section.with-open-cards { margin-top: 30px; }
-        .schedule-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 28px; text-align: center; position: relative; z-index: 10; border-radius: 16px 16px 0 0; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3); }
-        .schedule-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%); pointer-events: none; border-radius: 16px 16px 0 0; }
-        .schedule-header h2 { display: flex; align-items: center; justify-content: center; font-weight: 700; letter-spacing: -0.5px; position: relative; z-index: 1; font-size: 1.5rem; color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-        .schedule-header h2 .icon { width: 24px; height: 24px; margin-right: 14px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
-        .schedule-container { padding: 16px; overflow-x: auto; height: 666px; overflow-y: auto; background: #ffffff; }
+        .schedule-header { background: var(--primary); color: white; padding: 14px 20px; border-radius: 12px 12px 0 0; }
+        .schedule-header h2 { display: flex; align-items: center; font-weight: 700; letter-spacing: -0.3px; font-size: 1.1rem; color: white; margin: 0; }
+        .schedule-header h2 .icon { width: 18px; height: 18px; margin-right: 10px; }
+        .view-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 8px; padding: 3px; gap: 2px; }
+        .vt-btn { border: none; background: transparent; color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 6px; cursor: pointer; transition: all .15s; font-family: inherit; white-space: nowrap; }
+        .vt-btn.active { background: rgba(255,255,255,0.25); color: #fff; }
+        .vt-btn:hover:not(.active) { background: rgba(255,255,255,0.1); color: #fff; }
+        /* Employee view table */
+        .emp-view-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .emp-view-table th { padding: 9px 6px; text-align: center; font-weight: 600; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--border); white-space: nowrap; position: sticky; top: 0; background: #fff; z-index: 2; }
+        .emp-view-table th.emp-col { text-align: left; min-width: 160px; position: sticky; left: 0; background: #fff; z-index: 3; padding-left: 14px; }
+        .emp-view-table td { padding: 6px 5px; text-align: center; border-bottom: 1px solid var(--border); border-right: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+        .emp-view-table td.emp-name-cell { text-align: left; padding: 6px 14px; position: sticky; left: 0; background: #fff; z-index: 1; font-weight: 600; font-size: 14px; border-right: 2px solid var(--border); }
+        .emp-view-table td.ev-clickable { cursor: pointer; }
+        .emp-view-table td.ev-clickable:hover { background: rgba(0,122,255,0.05) !important; }
+        .emp-view-table td.not-cur { background: #f8f9fa; }
+        .emp-view-table tr:last-child td { border-bottom: none; }
+        .emp-view-table tr:hover td { background: rgba(0,0,0,0.012); }
+        .emp-view-table tr:hover td.emp-name-cell { background: #f8f9fa; }
+        .ev-week-header { background: var(--bg); color: var(--text-muted); font-size: 12px; font-weight: 600; text-align: left; padding: 7px 14px; border-bottom: 1px solid var(--border); letter-spacing: .3px; }
+        .ev-chip { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+        .ev-morning { background: #FFF3E0; color: #E65100; }
+        .ev-evening { background: #EDE7F6; color: #512DA8; }
+        .ev-night   { background: #E3F2FD; color: #1565C0; }
+        .ev-rdm     { background: #E8F5E9; color: #2E7D32; }
+        .ev-office  { background: #F3E5F5; color: #6A1B9A; }
+        .ev-sw      { background: #E0F7FA; color: #00838F; }
+        .ev-off     { color: #bbb; font-size: 12px; }
+        .ev-vacation{ background: #FFF9C4; color: #F9A825; font-size: 12px; font-weight: 700; border-radius: 5px; padding: 3px 8px; }
+        .ev-empty   { color: #ddd; font-size: 12px; }
+        .ev-missing-row td { background: #fafafa; border-top: 2px solid var(--border); border-bottom: 2px solid var(--border); }
+        .ev-missing-row .emp-name-cell { background: #fafafa; }
+        /* Edit popover for employee view */
+        #evPopover { position: fixed; z-index: 9999; background: #fff; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 16px; min-width: 220px; border: 1px solid var(--border); }
+        #evPopover .ev-pop-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+        #evPopover .ev-pop-title span { color: var(--text-muted); font-weight: 500; }
+        .ev-pop-opt { display: block; width: 100%; text-align: left; background: none; border: none; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-family: inherit; cursor: pointer; font-weight: 500; color: var(--text); }
+        .ev-pop-opt:hover { background: var(--bg); }
+        .ev-pop-opt.active { font-weight: 700; }
+        .ev-pop-sep { height: 1px; background: var(--border); margin: 6px 0; }
+        .schedule-container { padding: 16px; overflow-x: auto; height: calc(100vh - 160px); min-height: 400px; overflow-y: auto; background: #ffffff; }
         .placeholder-text { color: rgba(60, 60, 67, 0.6); font-size: 1.1rem; font-weight: 500; text-align: center; padding: 50px; }
         .schedule-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); background: var(--surface); border: 1px solid #e5e7eb; }
         .schedule-table th { background: #f9fafb; color: #374151; padding: 10px 12px; text-align: center; font-weight: 600; font-size: 13px; position: sticky; top: 0; z-index: 3; border-bottom: 2px solid #e5e7eb; }
@@ -119,7 +177,7 @@
         .schedule-table tbody tr:nth-child(even) { background: rgba(120,120,128,0.03); }
         .schedule-table tbody tr:hover { background: #f9fafb; }
         .schedule-table tbody tr td:first-child { font-weight: 600; text-align: left; padding-left: 20px; }
-        .week-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 700; font-size: 1.15rem; padding: 20px; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.2); border-top: 3px solid rgba(255,255,255,0.3); border-bottom: 3px solid rgba(0,0,0,0.1); letter-spacing: 0.3px; }
+        .week-header { background: var(--primary); color: white; font-weight: 700; font-size: 1.15rem; padding: 16px 20px; text-align: center; letter-spacing: 0.3px; border-top: 1px solid rgba(255,255,255,0.08); }
         .week-header:not(:first-child) { padding-top: 30px; }
         /* schedule legend removed per request */
         .shift-box { display: inline-flex; align-items: center; justify-content: center; padding: 6px 8px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease; min-width: 70px; min-height: 36px; border: 1px solid rgba(16,24,40,0.06); background: #fbfbfe; color: #222; box-shadow: 0 4px 14px rgba(16,24,40,0.04); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -217,7 +275,7 @@
         .employee-info-label { font-weight: 500; color: #1d1d1f; }
         .employee-info-value { font-weight: 600; color: #007AFF; }
         .btn-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-        .stats-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 20px rgba(16,24,40,0.06); background: var(--surface); }
+        .stats-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(16,24,40,0.06); background: var(--surface); }
         .stats-table th { background: var(--primary); color: white; padding: 10px 8px; text-align: center; font-weight: 700; font-size: 13px; letter-spacing: -0.03px; text-shadow: 0 1px 2px rgba(0,0,0,0.08); border-bottom: 1px solid rgba(255,255,255,0.06); }
         .stats-table td { padding: 10px 8px; text-align: center; border: none; background: transparent; transition: background 0.12s ease; font-size: 14px; color: var(--text); font-weight: 500; }
         .stats-table tbody tr:nth-child(even) { background: rgba(120,120,128,0.03); }
@@ -270,6 +328,7 @@
         .icon-trash { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0'/%3E%3C/svg%3E") no-repeat center; background-size: contain; }
         .icon-plus { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M12 4.5v15m7.5-7.5h-15'/%3E%3C/svg%3E") no-repeat center; }
         .icon-edit { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10'/%3E%3C/svg%3E") no-repeat center; background-size: contain; }
+        .icon-export { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3'/%3E%3C/svg%3E") no-repeat center; background-size: contain; }
         .card-close-btn { position: absolute; top: 15px; right: 15px; width: 24px; height: 24px; border: none; background: rgba(120, 120, 128, 0.2); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; color: rgba(60, 60, 67, 0.6); font-size: 16px; font-weight: 500; }
         .card-close-btn:hover { background: rgba(255, 59, 48, 0.1); color: #FF3B30; }
         .stats-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
@@ -286,7 +345,7 @@
         .stat-label { font-size: 13px; color: rgba(60,60,67,0.7); font-weight: 600; text-transform: uppercase; letter-spacing:0.6px; }
 
         /* Employees Modal Styling */
-        .employees-modal-header { background: linear-gradient(135deg, var(--primary) 0%, #1a1a1a 100%); color: white; padding: 12px 16px; border-radius: 16px 16px 0 0; margin: -28px -28px 16px -28px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .employees-modal-header { background: var(--primary); color: white; padding: 12px 16px; border-radius: 16px 16px 0 0; margin: -28px -28px 16px -28px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
         .close-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
         .close-btn:hover { background: rgba(255,255,255,0.3); }
         .close-btn .icon { width: 16px; height: 16px; }
@@ -320,10 +379,21 @@
         
         @media (max-width: 768px) { .main-layout { grid-template-columns: 1fr; } .header h1 { font-size: 2rem; } body { padding: 15px; } .employees-grid { grid-template-columns: 1fr; } .calendar-grid { gap: 4px; } .calendar-day { min-height: 50px; padding: 8px; font-size: 12px; } .btn-group { flex-direction: column; } .stats-overview { grid-template-columns: repeat(2, 1fr); } .shift-type-tabs { flex-direction: column; } .shift-tab { flex: none; } }
 
+        /* Inline shift editor popover */
+        #shiftPopover { position: fixed; z-index: 9000; background: var(--surface); border: 1px solid rgba(16,24,40,0.10); border-radius: 12px; box-shadow: 0 8px 32px rgba(16,24,40,0.14); padding: 10px; min-width: 200px; display: none; }
+        #shiftPopover .pop-label { font-size: 11px; font-weight: 600; color: rgba(60,60,67,0.6); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+        #shiftPopover select { width: 100%; padding: 8px 32px 8px 10px; font-size: 14px; border-radius: 8px; border: none; background: rgba(120,120,128,0.1); color: var(--text); font-family: inherit; font-weight: 500; margin-bottom: 6px; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 14px; }
+        #shiftPopover select:last-of-type { margin-bottom: 0; }
+        #shiftPopover .pop-save { display: flex; gap: 6px; margin-top: 8px; }
+        #shiftPopover .pop-save button { flex: 1; padding: 7px; font-size: 12px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; }
+        #shiftPopover .pop-save .pop-ok { background: var(--primary); color: white; }
+        #shiftPopover .pop-save .pop-cancel { background: rgba(120,120,128,0.1); color: var(--text); }
+        #shiftPopover .pop-warn { font-size: 11px; color: #D2691E; background: rgba(255,149,0,0.1); border-radius: 6px; padding: 5px 8px; margin-bottom: 6px; }
+
         /* Modal / vacation controls polish */
         /* Vacation Modal Redesign */
         #vacationModal .modal-content { max-width: 100%; width: 100%; max-height: 100%; border-radius: 16px; display: flex; flex-direction: column; padding: 28px; }
-        .vacation-modal-header { background: linear-gradient(135deg, var(--primary) 0%, #1a1a1a 100%); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-radius: 16px 16px 0 0; margin: -28px -28px 16px -28px; }
+        .vacation-modal-header { background: var(--primary); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-radius: 16px 16px 0 0; margin: -28px -28px 16px -28px; }
         .vacation-modal-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; }
         .vacation-modal-header .close-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; font-size: 20px; transition: all 0.2s; }
         .vacation-modal-header .close-btn:hover { background: rgba(255,255,255,0.3); }
@@ -354,6 +424,23 @@
             .vacation-tabs { padding: 12px 16px; gap: 6px; }
             .vacation-tab { padding: 8px 12px; font-size: 13px; }
         }
+
+        /* ── PRINT ─────────────────────────────────────────────── */
+        @media print {
+            body { background: #fff !important; margin: 0; padding: 0; }
+            .topbar, .modal-overlay, #evPopover { display: none !important; }
+            #schedule-container { padding: 0 !important; overflow: visible !important; height: auto !important; }
+            .print-header { display: block !important; }
+            .emp-view-table { page-break-inside: auto; font-size: 11px; }
+            .emp-view-table tr { page-break-inside: avoid; }
+            .ev-week-header { background: #1c1c1e !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .ev-chip { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .ev-emp-row td, .ev-emp-row th { padding: 4px 6px !important; }
+            @page { size: A4 landscape; margin: 10mm; }
+        }
+        .print-header { display: none; font-family: inherit; padding: 0 0 12px; }
+        .print-header h2 { margin: 0 0 2px; font-size: 18px; }
+        .print-header p { margin: 0; font-size: 12px; color: #666; }
     </style>
     <script>
         // Autotest logging safety: определяем минимальную реализацию, если её откатили
@@ -434,96 +521,104 @@
 </head>
 <body>
     <div class="container">
-        <div class="main-layout">
-            <div class="sidebar">
-                <div class="card">
-                    <div class="card-title">
-                        <div class="icon icon-calendar"></div>
-                        Настройка расписания
-                    </div>
-                    <div class="form-group">
-                        <label for="yearSelect">Год</label>
-                        <select id="yearSelect">
-                            <option value="2025" selected>2025</option>
-                            <option value="2026">2026</option>
-                            <option value="2027">2027</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="monthSelect">Месяц</label>
-                        <select id="monthSelect">
-                            <option value="1">Январь</option>
-                            <option value="2">Февраль</option>
-                            <option value="3">Март</option>
-                            <option value="4">Апрель</option>
-                            <option value="5">Май</option>
-                            <option value="6">Июнь</option>
-                            <option value="7">Июль</option>
-                            <option value="8">Август</option>
-                            <option value="9">Сентябрь</option>
-                            <option value="10">Октябрь</option>
-                            <option value="11">Ноябрь</option>
-                            <option value="12">Декабрь</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="pboNightShifts">ПБО работает ночью</label>
-                        <select id="pboNightShifts">
-                            <option value="true" selected>Да</option>
-                            <option value="false">Нет</option>
-                        </select>
-                    </div>
+        <!-- Топбар -->
+        <div class="topbar">
+            <div class="topbar-title">
+                <span class="t-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </span>
+                <div class="topbar-title-text">
+                    <span class="t-main">Расписание</span>
+                    <span class="t-sub">Менеджеры ПБО</span>
                 </div>
-                <div class="card">
-                    <div class="card-title">
-                        <div class="icon icon-users"></div>
-                        Управление
-                    </div>
-                    <div class="btn-toolbar" role="toolbar" aria-label="Управление">
-                        <button class="btn btn-primary" id="generateBtn">
-                            <div class="icon icon-generate"></div>
-                            Генерировать
-                        </button>
-                        <button class="btn btn-info" id="statsBtn">
-                            <div class="icon icon-stats"></div>
-                            Статистика
-                        </button>
-                        <!-- Кнопки 'Балансировать' и 'Тест' объединены в основную кнопку 'Генерировать' -->
-                        <button class="btn btn-warning" id="employeesBtn">
-                            <div class="icon icon-team"></div>
-                            Сотрудники
-                        </button>
-                        <button class="btn btn-danger" id="clearBtn">
-                            <div class="icon icon-trash"></div>
-                            Очистить расписание
-                        </button>
-                        <button class="btn btn-secondary" id="clearDataBtn">
-                            Сброс данных
-                        </button>
-                    </div>
-                    <div id="balanceProgressContainer" style="display:none; margin-top:12px;">
-                        <div id="balanceProgressText" style="font-size:13px; color: rgba(60,60,67,0.7); margin-bottom:6px;">Балансировка: 0%</div>
-                        <div style="background:#e6eef5; border-radius:8px; height:10px; overflow:hidden;">
-                            <div id="balanceProgressBar" style="height:100%; width:0%; background: linear-gradient(90deg,#34C759,#007AFF); transition: width 120ms linear;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="errorMessage" class="alert alert-error"></div>
-                <div id="successMessage" class="alert alert-success"></div>
             </div>
-            <div class="schedule-section">
-                <div class="schedule-header">
-                    <h2>
-                        <div class="icon icon-schedule"></div>
-                        Расписание смен
-                    </h2>
+            <div class="topbar-selects">
+                <div class="topbar-select-group">
+                    <label for="yearSelect">Год</label>
+                    <select id="yearSelect">
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                    </select>
                 </div>
-                <div class="schedule-container" id="scheduleContainer">
-                    <p class="placeholder-text">Нажмите "Генерировать" для создания расписания</p>
+                <div class="topbar-select-group">
+                    <label for="monthSelect">Месяц</label>
+                    <select id="monthSelect">
+                        <option value="1">Январь</option>
+                        <option value="2">Февраль</option>
+                        <option value="3">Март</option>
+                        <option value="4">Апрель</option>
+                        <option value="5">Май</option>
+                        <option value="6">Июнь</option>
+                        <option value="7">Июль</option>
+                        <option value="8">Август</option>
+                        <option value="9">Сентябрь</option>
+                        <option value="10">Октябрь</option>
+                        <option value="11">Ноябрь</option>
+                        <option value="12">Декабрь</option>
+                    </select>
                 </div>
-                
+                <div class="topbar-select-group">
+                    <label for="pboNightShifts">Ночью</label>
+                    <select id="pboNightShifts">
+                        <option value="true" selected>Да</option>
+                        <option value="false">Нет</option>
+                    </select>
+                </div>
+            </div>
+            <div class="topbar-divider"></div>
+            <div class="topbar-actions" role="toolbar" aria-label="Управление">
+                <button class="btn btn-primary" id="generateBtn">
+                    <div class="icon icon-generate"></div>
+                    Генерировать
+                </button>
+                <button class="btn btn-ghost" id="statsBtn">
+                    <div class="icon icon-stats"></div>
+                    Статистика
+                </button>
+                <button class="btn btn-ghost" id="employeesBtn">
+                    <div class="icon icon-team"></div>
+                    Сотрудники
+                </button>
+                <button class="btn btn-ghost" id="clearBtn">
+                    <div class="icon icon-trash"></div>
+                    Очистить
+                </button>
+                <button class="btn btn-ghost" id="clearDataBtn">Сброс</button>
+                <button class="btn btn-ghost" id="printBtn" onclick="printSchedule()" title="Печать / PDF">
+                    <div class="icon" style="width:16px;height:16px;background-size:contain;background-repeat:no-repeat;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 6 2 18 2 18 9%22/><path d=%22M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2%22/><rect x=%226%22 y=%2214%22 width=%2212%22 height=%228%22/></svg>');"></div>
+                    Печать
+                </button>
             </div>
         </div>
+
+        <!-- Прогресс балансировки -->
+        <div id="balanceProgressContainer" style="display:none;">
+            <div id="balanceProgressText" style="font-size:13px; color: rgba(60,60,67,0.7); margin-bottom:6px;">Балансировка: 0%</div>
+            <div style="background:#e6eef5; border-radius:8px; height:8px; overflow:hidden;">
+                <div id="balanceProgressBar" style="height:100%; width:0%; background: linear-gradient(90deg,#34C759,#007AFF); transition: width 120ms linear;"></div>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="alert alert-error"></div>
+        <div id="successMessage" class="alert alert-success"></div>
+
+        <!-- Расписание на всю ширину -->
+        <div class="schedule-section">
+            <div class="schedule-header">
+                <h2>
+                    <div class="icon icon-schedule"></div>
+                    Расписание смен
+                </h2>
+            </div>
+            <div class="schedule-container" id="scheduleContainer">
+                <p class="placeholder-text">Нажмите "Генерировать" для создания расписания</p>
+            </div>
+        </div>
+
+        <!-- Скрытый sidebar (для совместимости с JS) -->
+        <div class="sidebar" style="display:none;"></div>
+        <div class="main-layout" style="display:none;"></div>
     </div>
     <div class="modal" id="vacationModal" style="display: none;">
         <div class="modal-content" style="width: 1030px; height: 764px; display: flex; flex-direction: column; overflow: hidden;">
@@ -731,8 +826,9 @@
             if (slotKey === 'morningManager' || slotKey === 'eveningManager') return lvl === 'level3';
             // RDM: level4 или level5
             if (slotKey === 'rdm') return lvl === 'level4' || lvl === 'level5';
-            // Inside slots: must have canInside true; level6 allowed but respect insideMaxPerWeek
+            // Inside slots: level4/5/6 only (level3 — никогда inside по политике)
             if (slotKey === 'morningInside' || slotKey === 'eveningInside') {
+                if (lvl === 'level3' || lvl === 'level2' || lvl === 'level1') return false;
                 if (!emp.canInside) return false;
                 if (emp.level === 'level6' && typeof emp.insideMaxPerWeek === 'number') {
                     return (countInsideInWeek(emp.name, dayIdx) < emp.insideMaxPerWeek);
@@ -745,6 +841,17 @@
                 const pboNightShifts = document.getElementById('pboNightShifts')?.value === 'true';
                 const lastCurrentIdx = (() => { let ii = -1; for (let i = 0; i < currentSchedule.length; i++) { if (currentSchedule[i].isCurrentMonth) ii = i; } return ii; })();
                 if (!pboNightShifts && dayIdx !== lastCurrentIdx) return false;
+                // Макс 2 ночи в неделю — считаем от начала недели по dayIdx
+                if (typeof dayIdx === 'number') {
+                    const wS = Math.floor(dayIdx / 7) * 7;
+                    const wE = Math.min(wS + 6, currentSchedule.length - 1);
+                    let nightCnt = 0;
+                    for (let i = wS; i <= wE; i++) {
+                        const d = currentSchedule[i];
+                        if (d && (d.night === emp.name || d.night2 === emp.name)) nightCnt++;
+                    }
+                    if (nightCnt >= 2) return false;
+                }
                 return true;
             }
             // By default allow other slots (safety)
@@ -776,14 +883,11 @@
             return ['night','morningInside','morningManager','eveningInside','eveningManager','rdm','office','sw'].some(k => d[k] === empName);
         }
 
-        // Простое правило отдыха: если вчера была вечерняя смена, то завтра утренняя запрещена
-        // Также: после ночной смены нельзя назначать другие смены в течение 2 дней (или снова ночь)
+        // Правило отдыха: после ночи — следующий день выходной (если не снова ночь). Запрет вечер→утро.
         function canWorkAfterShift(empName, day, shiftType) {
             if (!Array.isArray(currentSchedule) || currentSchedule.length === 0) return true;
             const idx = currentSchedule.findIndex(x => x.day === day);
             if (idx <= 0) {
-                // нет предыдущего дня — нельзя проверить вечер->утро
-                // но также проверим следующий день для вечерних смен
                 if (shiftType === 'eveningInside' || shiftType === 'eveningManager') {
                     const next = currentSchedule[idx + 1];
                     if (next && (next.morningInside === empName || next.morningManager === empName)) return false;
@@ -791,31 +895,16 @@
                 return true;
             }
             const prev = currentSchedule[idx - 1];
-            
-            // Правило ночной смены: после ночи нужны выходные или снова ночь
-            if ((prev.night === empName || prev.night2 === empName) && shiftType !== 'night' && shiftType !== 'night2') {
-                // Вчера была ночь для этого сотрудника, сегодня может быть только ночь или выходной
-                return false;
-            }
-            
-            // Проверим день до вчера на предмет ночи
-            if (idx > 1) {
-                const dayBefore = currentSchedule[idx - 2];
-                if ((dayBefore.night === empName || dayBefore.night2 === empName) && prev.night !== empName && prev.night2 !== empName && shiftType !== 'night' && shiftType !== 'night2') {
-                    // 2 дня назад была ночь, вчера выходной, сегодня тоже должен быть выходной (или снова ночь)
-                    return false;
-                }
-            }
-            
+            // После ночи — только ночь или выходной
+            if ((prev.night === empName || prev.night2 === empName) && shiftType !== 'night' && shiftType !== 'night2') return false;
+            // Запрет вечер → утро
             const hadEveningYesterday = prev.eveningInside === empName || prev.eveningManager === empName;
             if (hadEveningYesterday && (shiftType === 'morningInside' || shiftType === 'morningManager')) return false;
-
-            // Если проверяем назначение вечерней смены — запретим её если на следующий день у того же сотрудника уже назначено утро
+            // Запрет вечер если завтра уже утро
             if (shiftType === 'eveningInside' || shiftType === 'eveningManager') {
                 const next = currentSchedule[idx + 1];
                 if (next && (next.morningInside === empName || next.morningManager === empName)) return false;
             }
-
             return true;
         }
 
@@ -826,21 +915,16 @@
 
             const prev = currentSchedule[idx - 1];
 
+            // Правило: после ночи — следующий день выходной (если не снова ночь)
             if (prev && (prev.night === empName || prev.night2 === empName) && shiftType !== 'night' && shiftType !== 'night2') {
                 return false;
             }
 
-            if (idx > 1) {
-                const dayBefore = currentSchedule[idx - 2];
-                if (dayBefore && (dayBefore.night === empName || dayBefore.night2 === empName)) {
-                    const prevWasHisNight = prev && (prev.night === empName || prev.night2 === empName);
-                    if (!prevWasHisNight && shiftType !== 'night' && shiftType !== 'night2') return false;
-                }
-            }
-
+            // Запрет вечер → утро (< 13ч отдыха)
             const hadEveningYesterday = prev && (prev.eveningInside === empName || prev.eveningManager === empName);
             if (hadEveningYesterday && (shiftType === 'morningInside' || shiftType === 'morningManager')) return false;
 
+            // Запрет вечер если завтра уже стоит утро у этого же человека
             if (shiftType === 'eveningInside' || shiftType === 'eveningManager') {
                 const next = currentSchedule[idx + 1];
                 if (next && (next.morningInside === empName || next.morningManager === empName)) return false;
@@ -919,7 +1003,7 @@
             const emps = getAllEmployees().map(e => e.name);
             if (!emps.length) return;
 
-            const iterations = typeof options.iterations === 'number' ? options.iterations : 50000;
+            const iterations = typeof options.iterations === 'number' ? options.iterations : 2000;
             const perPersonLimit = typeof options.perPersonLimit === 'number' ? options.perPersonLimit : 2; // мягкий шаг (увеличен)
             const maxTotalDelta = typeof options.maxTotalDelta === 'number' ? options.maxTotalDelta : 2; // защита: не менять суммарно более чем на ±2
             const maxGainPerRun = typeof options.maxGainPerRun === 'number' ? options.maxGainPerRun : 1; // жёсткий лимит роста +1 за run
@@ -972,6 +1056,10 @@
 
             const monthlyInsideCaps = computeMonthlyInsideCaps();
 
+            // Быстрый Map: имя → объект сотрудника (избегаем O(n) find() в горячих циклах)
+            const empByName = new Map();
+            getAllEmployees().forEach(e => empByName.set(e.name, e));
+
             let counts = recomputeCounts();
             // Снимем снимок начальных счётов, чтобы ограничивать суммарные изменения по сотруднику
             const initialCounts = Object.assign({}, counts);
@@ -1018,19 +1106,7 @@
                 if (!empName) return false;
                 return !!(protectedDays[empName] && protectedDays[empName].has(dayIdx));
             };
-            // Подсчёт смен сотрудника в неделе, содержащей dayIdx
-            const countShiftsInWeek = (empName, dayIdx) => {
-                if (!empName || typeof dayIdx !== 'number') return 0;
-                const weekStart = Math.floor(dayIdx / 7) * 7;
-                const weekEnd = Math.min(weekStart + 6, currentSchedule.length - 1);
-                let c = 0;
-                for (let ii = weekStart; ii <= weekEnd; ii++) {
-                    ['night','night2','morningInside','morningManager','eveningInside','eveningManager','rdm','office','sw'].forEach(k => {
-                        if (currentSchedule[ii][k] === empName) c++;
-                    });
-                }
-                return c;
-            };
+            // countShiftsInWeek — используем глобальную функцию (локальный дубль удалён)
 
             // Проверяет, не превысит ли у сотрудника лимит 5 смен в неделе после переноса
             const willExceedAfterSwap = (empName, removeDayIdx, addDayIdx) => {
@@ -1043,6 +1119,7 @@
                 return (addCount + 1) > 5;
             };
             let anyChange = false;
+            let noProgressStreak = 0;
 
             for (let iter = 0; iter < iterations; iter++) {
                 if (iter % updateEvery === 0) {
@@ -1059,6 +1136,8 @@
                 const surplus = emps.filter(e => (counts[e] || 0) > avg);
                 const deficit = emps.filter(e => (counts[e] || 0) < avg);
                 if (!surplus.length || !deficit.length) break;
+                // Ранний выход: если 5 итераций подряд без прогресса — нет смысла продолжать
+                if (noProgressStreak >= 5) break;
 
                 let movedThisIter = false;
                 // рандомизируем порядок, чтобы не давать приоритет постоянным людям
@@ -1073,8 +1152,8 @@
                         // смотрим только если у over явно больше, чем у under
                         if ((counts[over] || 0) <= (counts[under] || 0) + 1) continue;
                         let swapped = false;
-                        const overEmp = getAllEmployees().find(e => e.name === over);
-                        const underEmp = getAllEmployees().find(e => e.name === under);
+                        const overEmp = empByName.get(over);
+                        const underEmp = empByName.get(under);
                         if (!overEmp || !underEmp) continue;
 
                         const canDo = (emp, key, dayIdx) => {
@@ -1154,8 +1233,7 @@
                                 // не давать кандидату больше 5 смен в неделе
                                 (countShiftsInWeek(c, i) < 5) &&
                                 // не превышать месячную квоту по инсайдам и недельный лимит для уровня 6
-                                (!(['morningInside','eveningInside'].includes(k)) || ((monthlyInsideCaps[k] && (countSlotInMonth(c, k) < (monthlyInsideCaps[k][c] || 0))) && canTakeInsideAt(getAllEmployees().find(e=>e.name===c), i))) &&
-                                movedCount[c] < perPersonLimit &&
+                                (!(['morningInside','eveningInside'].includes(k)) || ((monthlyInsideCaps[k] && (countSlotInMonth(c, k) < (monthlyInsideCaps[k][c] || 0))) && canTakeInsideAt(empByName.get(c), i))) &&
                                 movedCount[c] < perPersonLimit &&
                                 !isEmployeeUnavailable(c, d.day) &&
                                 !hasShiftOnDay(c, d.day) &&
@@ -1187,6 +1265,8 @@
                     }
                 }
 
+                if (movedThisIter) { noProgressStreak = 0; } else { noProgressStreak++; }
+
                 if (!movedThisIter) {
                     // Точечные замены: пытаемся закрыть пустые обязательные слоты
                     // перемещая низкоприоритетные слоты (sw/office/rdm/night2)
@@ -1204,7 +1284,7 @@
 
                                 // Найти кандидата, кому можно поставить этот слот
                                 for (const cand of deficitShuffled) {
-                                    const empObj = getAllEmployees().find(e => e.name === cand);
+                                    const empObj = empByName.get(cand);
                                     if (!empObj) continue;
                                     if (isEmployeeUnavailable(cand, day.day)) continue;
                                     if (hasShiftOnDay(cand, day.day)) continue;
@@ -1261,7 +1341,7 @@
                                 ? options.aggressiveLimit
                                 : (window.SchedulePerf && typeof window.SchedulePerf.maxAggressive === 'number')
                                     ? window.SchedulePerf.maxAggressive
-                                    : 50000; // увеличен по умолчанию
+                                    : 1500;
                             let ag = 0;
                             const overList = surplusShuffled.slice();
                             const underList = deficitShuffled.slice();
@@ -1269,8 +1349,8 @@
                             for (const over of overList) {
                                 for (const under of underList) {
                                     if (ag++ > maxAggressive) break;
-                                    const overEmp = getAllEmployees().find(e => e.name === over);
-                                    const underEmp = getAllEmployees().find(e => e.name === under);
+                                    const overEmp = empByName.get(over);
+                                    const underEmp = empByName.get(under);
                                     if (!overEmp || !underEmp) continue;
                                     for (let i = 0; i < currentSchedule.length; i++) {
                                         const di = currentSchedule[i];
@@ -1690,10 +1770,15 @@
 
         // Подсчёт незаполненных ОБЯЗАТЕЛЬНЫХ слотов (инсайды, менеджеры, ночь)
         function countMissingMandatorySlots() {
-            const mandatoryKeys = ['night','morningInside','morningManager','eveningInside','eveningManager'];
+            const pboNightShifts = document.getElementById('pboNightShifts')?.value === 'true';
+            const lastCurrentIdx = (() => { let ii = -1; for (let i = 0; i < currentSchedule.length; i++) { if (currentSchedule[i].isCurrentMonth) ii = i; } return ii; })();
+            const baseKeys = ['morningInside','morningManager','eveningInside','eveningManager'];
             let missing = 0;
-            currentSchedule.forEach(d => {
-                mandatoryKeys.forEach(k => {
+            currentSchedule.forEach((d, idx) => {
+                const keys = pboNightShifts || idx === lastCurrentIdx
+                    ? ['night', ...baseKeys]
+                    : baseKeys;
+                keys.forEach(k => {
                     const v = d[k];
                     if (!v || v === '–') missing++;
                 });
@@ -1723,21 +1808,7 @@
             12: 176   // Декабрь
         };
 
-        function showMessage(message, isError = false) {
-            const errorEl = document.getElementById('errorMessage');
-            const successEl = document.getElementById('successMessage');
-            if (isError) {
-                errorEl.textContent = message;
-                errorEl.style.display = 'block';
-                successEl.style.display = 'none';
-                setTimeout(() => errorEl.style.display = 'none', 5000);
-            } else {
-                successEl.textContent = message;
-                successEl.style.display = 'block';
-                errorEl.style.display = 'none';
-                setTimeout(() => successEl.style.display = 'none', 5000);
-            }
-        }
+        function showMessage(message, isError = false) { /* убрано */ }
 
         // Overlay creation removed — replaced with no-op to avoid render issues
         function showGenerationOverlay(/* text */) {
@@ -2475,8 +2546,8 @@
                 for (let i = 0; i < currentSchedule.length; i++) {
                     if (i === lastCurrentIdx) continue;
                     if (currentSchedule[i]) {
-                        currentSchedule[i].night = null;
-                        currentSchedule[i].night2 = null;
+                        currentSchedule[i].night = "";
+                        currentSchedule[i].night2 = "";
                     }
                 }
                 // Уберём ночные из порядка заполнения — далее ночные не будут выставляться в этой функции
@@ -2605,7 +2676,7 @@
                         if (!isSlotAllowedForEmployee(emp, slot, dayIdx)) return null;
                         // Ночные слоты (оба night/night2) учитывают недельный и глобальный лимит ночей
                         if (slot === 'night' || slot === 'night2') {
-                            if ((weekNightCounts[emp.name] || 0) >= 4) return null; // максимум 4 ночи в неделю с учётом перераспределений
+                            if ((weekNightCounts[emp.name] || 0) >= 2) return null; // максимум 2 ночи в неделю
                             if ((globalNightCounts[emp.name] || 0) >= MAX_NIGHTS_PER_PERIOD) {
                                 console.log(`🚫 [LIMIT] ${emp.name} rejected for ${slot} on day ${day.day}: globalNightCounts=${globalNightCounts[emp.name]}, MAX=${MAX_NIGHTS_PER_PERIOD}`);
                                 return null; // глобальный лимит за период
@@ -4651,20 +4722,10 @@
             }
             // Гарантируем сдвоенные выходные для уровня >=4 и хотя бы один сдвоенный сб+вс в месяц
             ensureDoubleOffsRules();
-            // Добиваем минимум 5 смен в неделю для уровней 4+
-            enforceHighLevelMinimums();
-            // Финальная коррекция: level4/5 не должны быть менеджерами, исправляем и реаранжируем смены
+            // Финальная коррекция: level4/5 не должны быть менеджерами
             correctManagerToInsideSwaps();
-            // Оптимизация: переставляем людей между слотами в рамках одного дня для лучшего распределения
-            optimizeDailyShifts();
-            // ФИНАЛЬНАЯ ГАРАНТИЯ: Убедимся что КАЖДЫЙ имеет ровно 5 смен в неделю
-            enforceExactFiveShifts();
             // УДАЛЯЕМ ДУБЛИ: если один человек в 2 смене в один день, удаляем менее важную
             removeDuplicatesInDay();
-            // КРИТИЧЕСКАЯ ФИНАЛЬНАЯ ПРОВЕРКА: Гарантируем что все менеджер-слоты заполнены
-            fillAllManagerSlots();
-            // САМЫЙ ФИНАЛЬНЫЙ ПРОХОД: Добиваем смены для ВСЕХ у кого меньше 5
-            finalEnforceAllMinimums();
             // ГАРАНТИЯ ОБЯЗАТЕЛЬНЫХ СМЕН: инсайды/менеджеры/ночи заполняются в приоритете
             finalFillMandatorySlots();
             // Финальные проходы: убрать дубли RDM и попытаться заполнить пустые слоты перестановками
@@ -4672,49 +4733,40 @@
             try { fillEmptySlotsByMoving(); } catch (e) { console.error('fillEmptySlotsByMoving error', e); }
         }
 
-        // Обеспечивает соблюдение правил ночных смен: после ночной смены - 2 дня выходного или снова ночь
+        // После ночной смены — следующий день выходной (если следующий день тоже не ночь).
+        // Ночь за ночью допускается: следующая ночь сама обеспечит отдых после себя.
         function enforceNightShiftRules() {
-            // После ночи: два дня подряд должны быть выходные для сотрудника, если они не закрыты ночной сменой
-            const keys = ['morningInside','morningManager','eveningInside','eveningManager','rdm','office','sw','night','night2'];
+            const keys = ['morningInside','morningManager','eveningInside','eveningManager','rdm','office','sw'];
             const nightKeys = ['night','night2'];
             for (let i = 0; i < currentSchedule.length; i++) {
                 const today = currentSchedule[i];
                 for (const nk of nightKeys) {
                     const nightWorker = today[nk];
                     if (!nightWorker) continue;
-
-                    // Проверяем два последующих дня
-                    for (let offset = 1; offset <= 2; offset++) {
-                        const target = currentSchedule[i + offset];
-                        if (!target) continue;
-
-                        // Если в этот день у него снова ночь — это допустимо, идём дальше
-                        if (nightKeys.some(k => target[k] === nightWorker)) continue;
-
-                        // Иначе делаем для сотрудника полный выходной
-                        keys.forEach(k => {
-                            if (target[k] === nightWorker) target[k] = '';
-                        });
-                    }
+                    const nextDay = currentSchedule[i + 1];
+                    if (!nextDay) continue;
+                    // Если следующий день — тоже ночь, не трогаем (ночь обеспечит отдых после себя)
+                    if (nightKeys.some(k => nextDay[k] === nightWorker)) continue;
+                    // Иначе очищаем следующий день от любых утренних/вечерних/дополнительных смен
+                    keys.forEach(k => { if (nextDay[k] === nightWorker) nextDay[k] = ''; });
                 }
             }
         }
 
         // Версия enforceNightShiftRules для диапазона дней s..e
         function enforceNightShiftRulesForRange(s, e) {
-            const keys = ['morningInside','morningManager','eveningInside','eveningManager','rdm','office','sw','night','night2'];
+            const keys = ['morningInside','morningManager','eveningInside','eveningManager','rdm','office','sw'];
             const nightKeys = ['night','night2'];
             for (let i = s; i <= e; i++) {
                 const today = currentSchedule[i]; if (!today) continue;
                 for (const nk of nightKeys) {
                     const nightWorker = today[nk];
                     if (!nightWorker) continue;
-                    for (let offset = 1; offset <= 2; offset++) {
-                        const target = currentSchedule[i + offset];
-                        if (!target || (i + offset) > e) continue;
-                        if (nightKeys.some(k => target[k] === nightWorker)) continue;
-                        keys.forEach(k => { if (target[k] === nightWorker) target[k] = ''; });
-                    }
+                    if (i + 1 > e) continue;
+                    const nextDay = currentSchedule[i + 1];
+                    if (!nextDay) continue;
+                    if (nightKeys.some(k => nextDay[k] === nightWorker)) continue;
+                    keys.forEach(k => { if (nextDay[k] === nightWorker) nextDay[k] = ''; });
                 }
             }
         }
@@ -4777,12 +4829,25 @@
                         d.sw = '';
                         continue;
                     }
-                    // Или если в неделе есть незаполненные обязательные слоты — очищаем, чтобы дать шанс другим
+                    // Убираем SW только если работник может реально закрыть пустой обязательный слот
+                    // (иначе удаление SW ничего не даёт — слот всё равно останется пустым)
                     if (weekMissingMandatory > 0) {
-                        try { autotestLog({ action: 'cleanupSw_removed', day: d.day, emp: swEmp, reason: 'weekMissingMandatory', weekStart: s, weekEnd: e }); } catch (err) {}
-                        console.debug('cleanupSw removed (weekMissingMandatory)', { day: d.day, emp: swEmp, weekStart: s, weekEnd: e });
-                        d.sw = '';
-                        continue;
+                        const swEmpObj = getAllEmployees().find(e => e.name === swEmp);
+                        const canFillMandatory = swEmpObj && ['morningInside','eveningInside','morningManager','eveningManager','night'].some(k => {
+                            for (let j = s; j <= e; j++) {
+                                const rec = currentSchedule[j];
+                                if (!rec || rec[k]) continue;
+                                if (isEmployeeUnavailable(swEmp, rec.day)) continue;
+                                if (countShiftsOnDayRecord(swEmp, rec) > 0) continue;
+                                if (!isSlotAllowedForEmployee(swEmpObj, k, j)) continue;
+                                return true;
+                            }
+                            return false;
+                        });
+                        if (canFillMandatory) {
+                            d.sw = '';
+                            continue;
+                        }
                     }
                     // В остальных случаях — оставляем SW (не трогаем низкоприоритетные смены без явной нужды)
                 }
@@ -4812,7 +4877,7 @@
                         });
 
                         if (morningCandidates.length) {
-                            tomorrow[mshift] = morningCandidates[0].name;
+                            tomorrow[mshift] = shuffle(morningCandidates)[0].name;
                             return;
                         }
 
@@ -5107,8 +5172,8 @@
             // Когда ПБО не работает ночью — убираем все ночные назначения и ставим только "двойную" ночь в последний день текущего месяца
             if (!pboNightShifts) {
                 for (let i = 0; i < currentSchedule.length; i++) {
-                    currentSchedule[i].night = null;
-                    currentSchedule[i].night2 = null;
+                    currentSchedule[i].night = "";
+                    currentSchedule[i].night2 = "";
                 }
                 // Попытка поставить двух человек на последнюю ночь месяца
                 try { ensureDoubleNightLastDay(); } catch (e) { console.error('ensureDoubleNightLastDay error', e); }
@@ -5345,7 +5410,7 @@
                     for (let i = 0; i < currentSchedule.length; i++) if (currentSchedule[i].isCurrentMonth) lastCurrentIdx = i;
                     for (let i = 0; i < currentSchedule.length; i++) {
                         if (i === lastCurrentIdx) continue;
-                        if (currentSchedule[i].night2) currentSchedule[i].night2 = null;
+                        if (currentSchedule[i].night2) currentSchedule[i].night2 = "";
                     }
                 }
             } catch (err) { console.error('removeAllNight2Assignments error', err); }
@@ -5363,8 +5428,8 @@
                 }
                 for (let i = 0; i < currentSchedule.length; i++) {
                     if (i === lastCurrentIdx) continue;
-                    if (currentSchedule[i].night) currentSchedule[i].night = null;
-                    if (currentSchedule[i].night2) currentSchedule[i].night2 = null;
+                    if (currentSchedule[i].night) currentSchedule[i].night = "";
+                    if (currentSchedule[i].night2) currentSchedule[i].night2 = "";
                 }
             } catch (err) { console.error('removeAllNightAssignments error', err); }
         }
@@ -5441,7 +5506,7 @@
                                 // Allow night/night2 on lastCurrentIdx (end-of-month) if it's explicitly set and allowed
                                 if ((key === 'night' || key === 'night2') && j === lastCurrentIdx) continue;
                                 if (rec[key] === emp) {
-                                    rec[key] = null;
+                                    rec[key] = "";
                                 }
                             }
                         }
@@ -5536,7 +5601,7 @@
                                     const lastCurrentIdx = (() => { let idx=-1; for (let x=0;x<currentSchedule.length;x++) if (currentSchedule[x].isCurrentMonth) idx=x; return idx; })();
                                     const pbo = document.getElementById('pboNightShifts')?.value === 'true';
                                     if ((key === 'night' || key === 'night2') && !pbo && j === lastCurrentIdx) continue;
-                                    rec[key] = null;
+                                    rec[key] = "";
                                     try { autotestLog({ action: 'cleared_for_double_off', emp: name, dayIdx: j, day: rec.day, key }); } catch (e) {}
                                 }
                             }
@@ -6843,7 +6908,7 @@ function enforceRdmExactlyOnePerWeek() {
                     for (const i of days) {
                         if (!canUse(i)) continue;
                         const d = currentSchedule[i];
-                        if (!d.eveningInside) {
+                        if (!d.eveningInside && canWorkAfterShift(emp.name, d.day, 'eveningInside')) {
                             d.eveningInside = emp.name;
                             dayUsed.add(i);
                             counts.eveningInside++; counts.inside++; counts.total++;
@@ -6887,8 +6952,8 @@ function enforceRdmExactlyOnePerWeek() {
         function assignLevel5InsideShifts(start, end) {
             employees.level5?.forEach(emp => {
                 if (isEmployeeOnRequest(emp.name, null, 'off')) return;
-                if (!emp.canInside) return; // level5 без инсайдов не учитываем
-                
+                if (!emp.canInside) return;
+
                 const counts = { morningInside: 0, eveningInside: 0, total: 0 };
                 for (let i = start; i <= end; i++) {
                     const d = currentSchedule[i];
@@ -6896,36 +6961,32 @@ function enforceRdmExactlyOnePerWeek() {
                     if (d.eveningInside === emp.name) counts.eveningInside++;
                     counts.total += countShiftsOnDayRecord(emp.name, d);
                 }
-                
+
                 const days = shuffle([...Array(end - start + 1)].map((_, idx) => start + idx));
-                
-                // 1) ГАРАНТИРУЕМ 2 утра (даже если нужно перезаписать)
+
+                // 1) До 2 утренних инсайдов
                 for (const idx of days) {
                     if (counts.morningInside >= 2) break;
+                    if (counts.total >= 5) break;
                     const d = currentSchedule[idx];
                     if (isEmployeeOnRequest(emp.name, d.day, 'off')) continue;
-                    if (d.morningInside) continue; // Слот занят кем-то другим
+                    if (d.morningInside) continue;
+                    if (countShiftsOnDayRecord(emp.name, d) > 0) continue;
                     if (!canWorkAfterShift(emp.name, d.day, 'morningInside')) continue;
-                    // Допускаем перезапись других слотов (вечер, офис и т.д.)
-                    if (countShiftsOnDayRecord(emp.name, d) > 0) {
-                        // Только если уже есть смена в этот день, пропускаем этот день
-                        continue;
-                    }
                     d.morningInside = emp.name;
                     counts.morningInside++;
                     counts.total++;
                 }
-                
-                // 2) ГАРАНТИРУЕМ 2 вечера (даже если нужно перезаписать)
+
+                // 2) До 2 вечерних инсайдов
                 for (const idx of days) {
                     if (counts.eveningInside >= 2) break;
+                    if (counts.total >= 5) break;
                     const d = currentSchedule[idx];
                     if (isEmployeeOnRequest(emp.name, d.day, 'off')) continue;
-                    if (d.eveningInside) continue; // Слот занят кем-то другим
-                    if (countShiftsOnDayRecord(emp.name, d) > 0) {
-                        // Только если уже есть смена в этот день, пропускаем
-                        continue;
-                    }
+                    if (d.eveningInside) continue;
+                    if (countShiftsOnDayRecord(emp.name, d) > 0) continue;
+                    if (!canWorkAfterShift(emp.name, d.day, 'eveningInside')) continue;
                     d.eveningInside = emp.name;
                     counts.eveningInside++;
                     counts.total++;
@@ -6933,12 +6994,12 @@ function enforceRdmExactlyOnePerWeek() {
             });
         }
 
-        // Инсайды для level4: ГАРАНТИРОВАНО 2 утра и 2 вечера (4 смены инсайд)
+        // Инсайды для level4: до 2 утра и 2 вечера (4 смены инсайд), не более 5/нед
         function assignLevel4InsideShifts(start, end) {
             employees.level4?.forEach(emp => {
                 if (isEmployeeOnRequest(emp.name, null, 'off')) return;
-                if (!emp.canInside) return; // level4 без инсайдов не учитываем
-                
+                if (!emp.canInside) return;
+
                 const counts = { morningInside: 0, eveningInside: 0, total: 0 };
                 for (let i = start; i <= end; i++) {
                     const d = currentSchedule[i];
@@ -6946,29 +7007,32 @@ function enforceRdmExactlyOnePerWeek() {
                     if (d.eveningInside === emp.name) counts.eveningInside++;
                     counts.total += countShiftsOnDayRecord(emp.name, d);
                 }
-                
+
                 const days = shuffle([...Array(end - start + 1)].map((_, idx) => start + idx));
-                
-                // 1) ГАРАНТИРУЕМ 2 утра
+
+                // 1) До 2 утренних инсайдов
                 for (const idx of days) {
                     if (counts.morningInside >= 2) break;
+                    if (counts.total >= 5) break;
                     const d = currentSchedule[idx];
                     if (isEmployeeOnRequest(emp.name, d.day, 'off')) continue;
                     if (d.morningInside) continue;
-                    if (!canWorkAfterShift(emp.name, d.day, 'morningInside')) continue;
                     if (countShiftsOnDayRecord(emp.name, d) > 0) continue;
+                    if (!canWorkAfterShift(emp.name, d.day, 'morningInside')) continue;
                     d.morningInside = emp.name;
                     counts.morningInside++;
                     counts.total++;
                 }
-                
-                // 2) ГАРАНТИРУЕМ 2 вечера
+
+                // 2) До 2 вечерних инсайдов
                 for (const idx of days) {
                     if (counts.eveningInside >= 2) break;
+                    if (counts.total >= 5) break;
                     const d = currentSchedule[idx];
                     if (isEmployeeOnRequest(emp.name, d.day, 'off')) continue;
                     if (d.eveningInside) continue;
                     if (countShiftsOnDayRecord(emp.name, d) > 0) continue;
+                    if (!canWorkAfterShift(emp.name, d.day, 'eveningInside')) continue;
                     d.eveningInside = emp.name;
                     counts.eveningInside++;
                     counts.total++;
@@ -7098,17 +7162,16 @@ function enforceRdmExactlyOnePerWeek() {
                     }
                 }
                 
-                // Если не хватает, пробуем ИГНОРИРУЯ конфликты
+                // Если не хватает — последняя попытка с проверкой отдыха
                 if (added < needed) {
                     for (let i = start; i <= end && added < needed; i++) {
                         const d = currentSchedule[i];
                         if (isEmployeeOnRequest(emp.name, d.day, 'off')) continue;
                         if (countShiftsOnDayRecord(emp.name, d) > 0) continue;
-                        
-                        if (!d.morningInside) {
+                        if (!d.morningInside && canWorkAfterShift(emp.name, d.day, 'morningInside')) {
                             d.morningInside = emp.name;
                             added++;
-                        } else if (!d.eveningInside) {
+                        } else if (!d.eveningInside && canWorkAfterShift(emp.name, d.day, 'eveningInside')) {
                             d.eveningInside = emp.name;
                             added++;
                         }
@@ -7167,37 +7230,36 @@ function enforceRdmExactlyOnePerWeek() {
                     }
                 }
                 
-                // === ЭТАП 2: Если всё ещё не хватает, ИГНОРИРУЕМ конфликты menageров ===
+                // === ЭТАП 2: Последняя попытка с проверкой отдыха ===
                 if (added < needed) {
                     for (let i = start; i <= end && added < needed; i++) {
                         const d = currentSchedule[i];
                         if (isEmployeeOnRequest(emp.name, d.day, 'off')) continue;
                         if (countShiftsOnDayRecord(emp.name, d) > 0) continue;
-                        
-                        if (!d.morningManager) {
+                        if (!d.morningManager && canWorkAfterShift(emp.name, d.day, 'morningManager')) {
                             d.morningManager = emp.name;
                             added++;
-                        } else if (!d.eveningManager) {
+                        } else if (!d.eveningManager && canWorkAfterShift(emp.name, d.day, 'eveningManager')) {
                             d.eveningManager = emp.name;
                             added++;
                         }
                     }
                 }
                 
-                // === ЭТАП 3: ПОСЛЕДНЯЯ ПОПЫТКА - берём ЛЮБЫЕ слоты ===
-                // Если уровень 3 всё ещё не имеет 5 смен, берём любые доступные (включая insideы и sw если нужно)
+                // === ЭТАП 3: последняя попытка с минимальными проверками (только запрос и день занят) ===
                 if (added < needed) {
-                    const allKeys = ['morningManager', 'eveningManager', 'morningInside', 'eveningInside', 'sw'];
+                    const allKeys = ['morningManager', 'eveningManager', 'morningInside', 'eveningInside'];
                     for (let i = start; i <= end && added < needed; i++) {
                         const d = currentSchedule[i];
                         if (isEmployeeOnRequest(emp.name, d.day, 'off')) continue;
                         if (countShiftsOnDayRecord(emp.name, d) > 0) continue;
-                        
+                        if (!canWorkAfterShift(emp.name, d.day, 'morningManager')) continue; // базовая проверка отдыха
                         for (const key of allKeys) {
                             if (added >= needed) break;
-                            if (d[key]) continue; // Слот занят
-                            
-                            // Ставим в любой свободный слот
+                            if (d[key]) continue;
+                            if (key === 'morningInside' || key === 'eveningInside') {
+                                if (!emp.canInside) continue; // только если разрешён инсайд
+                            }
                             d[key] = emp.name;
                             added++;
                             break;
@@ -7278,6 +7340,8 @@ function enforceRdmExactlyOnePerWeek() {
         }
 
         function renderSchedule() {
+            renderScheduleByEmployee(); return;
+            // (slots view removed)
             const container = document.getElementById('scheduleContainer');
             if (!container) return;
             if (!currentSchedule.length) {
@@ -7353,16 +7417,19 @@ function enforceRdmExactlyOnePerWeek() {
                                 }
                             }
                         
+                        const pboNight = document.getElementById('pboNightShifts')?.value === 'true';
+                        const lastCurIdx = (() => { let ii = -1; for (let ci = 0; ci < currentSchedule.length; ci++) { if (currentSchedule[ci].isCurrentMonth) ii = ci; } return ii; })();
+                        const nightIsOptional = (s.key === 'night' || s.key === 'night2') && !pboNight && (currentSchedule.findIndex(dd => dd.day === d.day) !== lastCurIdx);
                         const optionalKeys = ['rdm','office','sw'];
                         const boxClass = value === '–'
-                            ? `empty-box ${optionalKeys.includes(s.key) ? 'missing-optional' : 'missing-shift'}`
+                            ? `empty-box ${(optionalKeys.includes(s.key) || nightIsOptional) ? 'missing-optional' : 'missing-shift'}`
                             : s.class;
                         const classes = [];
                         if (!d.isCurrentMonth) classes.push('dimmed');
                         if (value && value !== '–' && (dayConflicts[d.day] || []).includes(value)) classes.push('conflict');
                         const tdClass = classes.join(' ');
                         const titleAttr = value && value !== '–' ? `title="${value.replace(/<br>/g, ', ')}${(dayConflicts[d.day] || []).includes(value) ? ' — конфликт' : ''}"` : '';
-                        html += `<td class="${tdClass}"><div class="shift-box ${boxClass}" ${titleAttr} onclick="editShift(${d.day}, '${s.key}')">${value}</div></td>`;
+                        html += `<td class="${tdClass}"><div class="shift-box ${boxClass}" ${titleAttr} onclick="editShift(event,${d.day},'${s.key}')">${value}</div></td>`;
                     });
                     html += '</tr>';
                 });
@@ -7371,6 +7438,517 @@ function enforceRdmExactlyOnePerWeek() {
             html += '</tbody></table>';
             container.innerHTML = html;
         }
+
+        let _scheduleView = 'slots'; // 'slots' | 'employees'
+
+        window.setScheduleView = function(view) {
+            _scheduleView = view;
+            document.getElementById('vtSlots')?.classList.toggle('active', view === 'slots');
+            document.getElementById('vtEmps')?.classList.toggle('active', view === 'employees');
+            renderSchedule();
+        };
+
+        function renderScheduleByEmployee() {
+            const container = document.getElementById('scheduleContainer');
+            if (!container) return;
+            if (!currentSchedule.length) {
+                container.innerHTML = '<p class="placeholder-text">Нажмите "Генерировать" для создания расписания</p>';
+                return;
+            }
+
+            const pboNight = document.getElementById('pboNightShifts')?.value === 'true';
+            const lastCurrentIdx = (() => { let ii = -1; for (let i = 0; i < currentSchedule.length; i++) if (currentSchedule[i].isCurrentMonth) ii = i; return ii; })();
+
+            const allEmps = getAllEmployees();
+            allEmps.sort((a, b) => {
+                const lo = { level6: 4, level5: 3, level4: 2, level3: 1 };
+                return (lo[b.level] || 0) - (lo[a.level] || 0);
+            });
+
+            const levelColors = { level6: '#FF9500', level5: '#34C759', level4: '#5856D6', level3: '#007AFF' };
+            const levelLabels = { level6: '6', level5: '5', level4: '4', level3: '3' };
+            const monthNames = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+
+            function getEmpShift(emp, d) {
+                const req = (employeeRequests[emp.name] || {})[d.day];
+                if (req === 'vacation') return { type: 'vacation', label: 'Отп' };
+                if (req === 'off') return { type: 'off', label: 'Вых' };
+                const shifts = [];
+                if (d.morningInside === emp.name || d.morningManager === emp.name) shifts.push({ type: 'morning', label: d.morningInside === emp.name ? 'Утро-И' : 'Утро-М' });
+                if (d.eveningInside === emp.name || d.eveningManager === emp.name) shifts.push({ type: 'evening', label: d.eveningInside === emp.name ? 'Вечер-И' : 'Вечер-М' });
+                if (d.night === emp.name || d.night2 === emp.name) shifts.push({ type: 'night', label: 'Ночь' });
+                if (d.rdm === emp.name) shifts.push({ type: 'rdm', label: 'RDM' });
+                if (d.office === emp.name) shifts.push({ type: 'office', label: 'Офис' });
+                if (d.sw === emp.name) shifts.push({ type: 'sw', label: 'SW' });
+                if (shifts.length) return shifts[0];
+                // Плановый выходной из _empRotationPlan (если сгенерировали)
+                const di = currentSchedule.indexOf(d);
+                if (di >= 0 && window._empRotationPlan?.[emp.name]?.[di] === 'off') {
+                    return { type: 'planned-off', label: 'Вых' };
+                }
+                return null;
+            }
+
+            function chipHtml(shift, isCurrentMonth) {
+                if (!isCurrentMonth) return '';
+                // Незанятый день = выходной (серый Вых)
+                if (!shift) return '<span class="ev-chip" style="background:rgba(142,142,147,0.13);color:#8E8E93;border:1px solid rgba(142,142,147,0.2);">Вых</span>';
+                if (shift.type === 'vacation') return `<span class="ev-vacation">${shift.label}</span>`;
+                if (shift.type === 'off') return `<span class="ev-off">${shift.label}</span>`;
+                // Плановый выходной — серый, полупрозрачный (нет смены по плану)
+                if (shift.type === 'planned-off') return `<span class="ev-chip" style="background:rgba(142,142,147,0.13);color:#8E8E93;border:1px solid rgba(142,142,147,0.2);">${shift.label}</span>`;
+                const cls = { morning: 'ev-morning', evening: 'ev-evening', night: 'ev-night', rdm: 'ev-rdm', office: 'ev-office', sw: 'ev-sw' }[shift.type] || '';
+                return `<span class="ev-chip ${cls}">${shift.label}</span>`;
+            }
+
+            // Строка "что не заполнено" для каждого дня недели
+            function missingCellHtml(d, di) {
+                if (!d.isCurrentMonth) return '<td class="not-cur"></td>';
+                const dayIdx = currentSchedule.indexOf(d);
+                const needNight = pboNight || dayIdx === lastCurrentIdx;
+                const missing = [];
+                if (!d.morningInside || d.morningInside === '–') missing.push({ label: 'Утро-И', cls: 'ev-morning', slot: 'morningInside' });
+                if (!d.eveningInside || d.eveningInside === '–') missing.push({ label: 'Вечер-И', cls: 'ev-evening', slot: 'eveningInside' });
+                if (needNight && (!d.night || d.night === '–')) missing.push({ label: 'Ночь', cls: 'ev-night', slot: 'night' });
+                if (missing.length === 0) {
+                    return `<td style="text-align:center;"><span style="color:#34C759;font-size:16px;">✓</span></td>`;
+                }
+                // Каждый тег кликабелен — открывает попап выбора сотрудника для конкретного слота
+                const chips = missing.map(m =>
+                    `<span class="ev-chip ${m.cls} ev-clickable" style="display:block;margin:2px auto;font-size:10px;padding:2px 5px;cursor:pointer;" onclick="editSlotAssign(${d.day},'${m.slot}',event)">${m.label}</span>`
+                ).join('');
+                return `<td style="text-align:center;vertical-align:middle;padding:4px 3px;">${chips}</td>`;
+            }
+
+            let html = '<table class="emp-view-table"><tbody>';
+
+            for (let wi = 0; wi < currentSchedule.length; wi += 7) {
+                const week = currentSchedule.slice(wi, wi + 7);
+                // Если в неделе нет ни одного дня текущего месяца — пропускаем
+                if (!week.some(d => d.isCurrentMonth)) continue;
+
+                const wNum = Math.floor(wi / 7) + 1;
+                const wStart = `${week[0].actualDate.getDate()} ${monthNames[week[0].actualDate.getMonth()]}`;
+                const wEnd = `${week[week.length-1].actualDate.getDate()} ${monthNames[week[week.length-1].actualDate.getMonth()]}`;
+
+                html += `<tr><td colspan="8" class="ev-week-header">Неделя ${wNum} · ${wStart} — ${wEnd}</td></tr>`;
+
+                // Шапка дней — все 7 дней
+                html += '<tr><th class="emp-col">Сотрудник</th>';
+                week.forEach(d => {
+                    const mnLabel = !d.isCurrentMonth ? ` <span style="font-size:9px;opacity:.5;">${monthNames[d.actualDate.getMonth()]}</span>` : '';
+                    html += `<th>${d.dayName}${mnLabel}<br><span style="font-size:14px;font-weight:700;">${d.displayDay}</span></th>`;
+                });
+                html += '</tr>';
+
+                // Строки сотрудников
+                allEmps.forEach(emp => {
+                    const lc = levelColors[emp.level] || '#888';
+                    const ll = levelLabels[emp.level] || '';
+                    const weekShifts = week.map(d => getEmpShift(emp, d));
+                    const weekTotal = week.filter((d, i) => d.isCurrentMonth && weekShifts[i] && weekShifts[i].type !== 'off' && weekShifts[i].type !== 'vacation' && weekShifts[i].type !== 'planned-off').length;
+                    const tc = weekTotal >= 5 ? '#34C759' : weekTotal >= 3 ? '#FF9500' : '#FF3B30';
+
+                    html += `<tr class="ev-emp-row">
+                        <td class="emp-name-cell">
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:${lc}20;color:${lc};font-size:10px;font-weight:800;flex-shrink:0;">${ll}</span>
+                                <span style="font-size:14px;">${emp.name}</span>
+                                <span style="margin-left:auto;font-size:13px;font-weight:700;color:${tc};min-width:16px;text-align:right;">${weekTotal}</span>
+                            </div>
+                        </td>`;
+                    week.forEach((d, di) => {
+                        html += `<td class="ev-clickable" onclick="editEmpShift('${emp.name.replace(/'/g,"\\'")}',${d.day},event)">${chipHtml(weekShifts[di], true)}</td>`;
+                    });
+                    html += '</tr>';
+                });
+
+                // Строка "не заполнено" — все 7 дней
+                html += `<tr class="ev-missing-row"><td class="emp-name-cell" style="font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.3px;">Не заполнено</td>`;
+                week.forEach((d, di) => { html += missingCellHtml(d, di); });
+                html += '</tr>';
+            }
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+
+            // Растягиваем строки сотрудников чтобы одна неделя = один экран
+            requestAnimationFrame(() => {
+                const contH = container.clientHeight;
+                const weekHeaders = container.querySelectorAll('.ev-week-header');
+                if (!weekHeaders.length) return;
+                // Примерная высота служебных строк: week-header ~32, day-header ~44, missing-row ~44
+                const overheadPerWeek = 32 + 44 + 56;
+                const availH = Math.max(contH - overheadPerWeek, allEmps.length * 36);
+                const rowH = Math.min(56, Math.floor(availH / allEmps.length));
+                container.querySelectorAll('.ev-emp-row').forEach(r => {
+                    r.style.height = rowH + 'px';
+                });
+            });
+        }
+
+        // Закрыть поповер по клику вне
+        document.addEventListener('click', function(e) {
+            const pop = document.getElementById('evPopover');
+            if (pop && !pop.contains(e.target)) pop.remove();
+        });
+
+        // Открыть попап назначения конкретного слота (из строки "Не заполнено")
+        window.editSlotAssign = function(dayNum, slotKey, event) {
+            event.stopPropagation();
+            const existing = document.getElementById('evPopover');
+            if (existing) existing.remove();
+
+            const d = currentSchedule.find(x => x.day === dayNum);
+            if (!d) return;
+            const dayIdx = currentSchedule.indexOf(d);
+            const monthNames = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+            const dateLabel = `${d.actualDate.getDate()} ${monthNames[d.actualDate.getMonth()]}`;
+            const slotLabels = { morningInside: 'Утро — Инсайд', eveningInside: 'Вечер — Инсайд', night: 'Ночь' };
+
+            // Список всех сотрудников, отсортированных по доступности
+            const allEmps = getAllEmployees();
+
+            const pop = document.createElement('div');
+            pop.id = 'evPopover';
+            pop.style.maxHeight = '340px';
+            pop.style.overflowY = 'auto';
+
+            const rows = allEmps.map(emp => {
+                const weekShifts = countShiftsInWeek(emp.name, dayIdx);
+                const isOff = isEmployeeOnRequest(emp.name, d.day, 'off') || isEmployeeOnRequest(emp.name, d.day, 'vacation');
+                const alreadyToday = countShiftsOnDayRecord(emp.name, d) > 0;
+                const overLimit = weekShifts >= 5;
+                const disabled = isOff || alreadyToday || overLimit;
+                const hint = isOff ? 'выходной' : alreadyToday ? 'занят' : overLimit ? '≥5 смен' : `${weekShifts}/5`;
+                const hintColor = disabled ? '#FF3B30' : weekShifts >= 4 ? '#FF9500' : '#34C759';
+                return `<button class="ev-pop-opt${d[slotKey]===emp.name?' active':''}"
+                    style="${disabled?'opacity:.45;':''}cursor:${disabled?'default':'pointer'};"
+                    onclick="${disabled?'':'applyEmpShift(\''+emp.name.replace(/'/g,"\\'")+'\',' + dayNum + ',\''+slotKey+'\')'}">
+                    <span style="flex:1;text-align:left;">${emp.name}</span>
+                    <span style="font-size:11px;color:${hintColor};">${hint}</span>
+                </button>`;
+            }).join('');
+
+            pop.innerHTML = `
+                <div class="ev-pop-title">${slotLabels[slotKey] || slotKey} <span>· ${dateLabel}</span></div>
+                ${rows}
+                <div class="ev-pop-sep"></div>
+                <button class="ev-pop-opt" onclick="applyEmpShift('',${dayNum},'${slotKey}')" style="color:#FF3B30;">Очистить слот</button>`;
+
+            document.body.appendChild(pop);
+            const rect = event.currentTarget.getBoundingClientRect();
+            let top = rect.bottom + 6, left = rect.left;
+            if (left + 220 > window.innerWidth) left = window.innerWidth - 228;
+            if (top + 360 > window.innerHeight) top = rect.top - Math.min(pop.scrollHeight, 340) - 6;
+            pop.style.top = top + 'px';
+            pop.style.left = left + 'px';
+        };
+
+        window.editEmpShift = function(empName, dayNum, event) {
+            event.stopPropagation();
+            const existing = document.getElementById('evPopover');
+            if (existing) existing.remove();
+
+            const d = currentSchedule.find(x => x.day === dayNum);
+            if (!d) return;
+            const dayIdx = currentSchedule.indexOf(d);
+
+            const monthNames = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+            const dateLabel = `${d.actualDate.getDate()} ${monthNames[d.actualDate.getMonth()]}`;
+
+            // Текущая смена сотрудника
+            const slotKeys = ['morningInside','morningManager','eveningInside','eveningManager','night','night2','rdm','office','sw'];
+            const currentSlot = slotKeys.find(k => d[k] === empName) || null;
+
+            // Счётчик смен за неделю (не считая текущий слот — он будет заменён)
+            const weekShifts = countShiftsInWeek(empName, dayIdx);
+            const shiftColor = weekShifts >= 5 ? '#FF3B30' : weekShifts >= 4 ? '#FF9500' : '#34C759';
+
+            // Проверяем конфликты для каждого варианта смены
+            const getConflicts = (slotKey) => {
+                const issues = [];
+                // Уже 5 смен в неделю (и это не текущая смена)
+                const shiftsIfNew = currentSlot ? weekShifts : weekShifts + 1;
+                if (!currentSlot && weekShifts >= 5) issues.push('уже 5 смен/нед');
+                // Нет отдыха — предыдущий день ночная
+                const prevD = dayIdx > 0 ? currentSchedule[dayIdx - 1] : null;
+                if (prevD && (prevD.night === empName || prevD.night2 === empName) && slotKey !== 'night' && slotKey !== 'night2') {
+                    issues.push('мало отдыха после ночи');
+                }
+                // Назначаем ночь — следующий день уже занят
+                if ((slotKey === 'night' || slotKey === 'night2') && dayIdx + 1 < currentSchedule.length) {
+                    const nextD = currentSchedule[dayIdx + 1];
+                    if (nextD && slotKeys.some(k => nextD[k] === empName)) {
+                        issues.push('завтра уже есть смена');
+                    }
+                }
+                // Назначаем ночь подряд (вчера тоже ночь)
+                if ((slotKey === 'night' || slotKey === 'night2') && prevD && (prevD.night === empName || prevD.night2 === empName)) {
+                    issues.push('ночь подряд');
+                }
+                // 13-часовой отдых
+                if (!canWorkAfterShiftIdx(empName, dayIdx, slotKey)) {
+                    issues.push('< 13ч отдыха');
+                }
+                return issues;
+            };
+
+            const slotOptions = [
+                { key: 'morningInside',   label: 'Утро — Инсайд',    cls: 'ev-morning' },
+                { key: 'morningManager',  label: 'Утро — Менеджер',  cls: 'ev-morning' },
+                { key: 'eveningInside',   label: 'Вечер — Инсайд',   cls: 'ev-evening' },
+                { key: 'eveningManager',  label: 'Вечер — Менеджер', cls: 'ev-evening' },
+                { key: 'night',           label: 'Ночь',             cls: 'ev-night'   },
+                { key: 'rdm',             label: 'RDM',              cls: 'ev-rdm'     },
+                { key: 'office',          label: 'Офис',             cls: 'ev-office'  },
+                { key: 'sw',              label: 'SW',               cls: 'ev-sw'      },
+            ];
+
+            // Текущий запрос
+            const currentReq = (employeeRequests[empName] || {})[dayNum] || null;
+
+            const empSafe = empName.replace(/'/g,"\\'");
+
+            const pop = document.createElement('div');
+            pop.id = 'evPopover';
+            pop.style.minWidth = '230px';
+
+            // Шапка с именем и счётчиком смен
+            let html = `
+                <div class="ev-pop-title">${empName} <span>· ${dateLabel}</span></div>
+                <div style="font-size:11px;color:${shiftColor};padding:4px 12px 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+                    Смен на этой неделе: <strong>${weekShifts}</strong> из 5
+                </div>`;
+
+            // Варианты смен с предупреждениями
+            html += slotOptions.map(o => {
+                const conflicts = getConflicts(o.key);
+                const isCurrent = currentSlot === o.key;
+                const hasWarn = conflicts.length > 0 && !isCurrent;
+                const warnHtml = hasWarn
+                    ? `<span style="margin-left:auto;font-size:10px;color:#FF9500;font-weight:600;" title="${conflicts.join(', ')}">⚠ ${conflicts[0]}</span>`
+                    : '';
+                return `<button class="ev-pop-opt${isCurrent?' active':''}"
+                    style="${hasWarn?'background:rgba(255,149,0,0.05);':''}"
+                    onclick="applyEmpShift('${empSafe}',${dayNum},'${o.key}')">
+                    <span>${isCurrent?'✓ ':''}<span class="ev-chip ${o.cls}" style="font-size:11px;padding:1px 6px;">${o.label}</span></span>
+                    ${warnHtml}
+                </button>`;
+            }).join('');
+
+            // Убрать со смены
+            html += `<div class="ev-pop-sep"></div>
+                <button class="ev-pop-opt" onclick="applyEmpShift('${empSafe}',${dayNum},null)" style="color:#FF3B30;">
+                    Убрать со смены
+                </button>`;
+
+            pop.innerHTML = html;
+            document.body.appendChild(pop);
+
+            const rect = event.currentTarget.getBoundingClientRect();
+            let top = rect.bottom + 6, left = rect.left;
+            if (left + 250 > window.innerWidth) left = window.innerWidth - 258;
+            if (top + 500 > window.innerHeight) top = rect.top - Math.min(pop.scrollHeight, 480) - 6;
+            pop.style.top = top + 'px';
+            pop.style.left = left + 'px';
+        };
+
+        window.applyEmpShift = function(empName, dayNum, newSlot) {
+            const pop = document.getElementById('evPopover');
+            if (pop) pop.remove();
+
+            const d = currentSchedule.find(x => x.day === dayNum);
+            if (!d) return;
+
+            const slotKeys = ['morningInside','morningManager','eveningInside','eveningManager','night','night2','rdm','office','sw'];
+
+            if (empName) {
+                // Убираем сотрудника из всех слотов этого дня
+                slotKeys.forEach(k => { if (d[k] === empName) d[k] = ''; });
+            }
+
+            if (newSlot) {
+                // Если слот занят другим — освобождаем
+                if (d[newSlot] && d[newSlot] !== empName) d[newSlot] = '';
+                if (empName) d[newSlot] = empName;
+                else d[newSlot] = ''; // очищаем слот (вызов из editSlotAssign "Очистить")
+            }
+
+            renderSchedule();
+            saveData();
+        };
+
+        // Установить/снять запрос сотрудника на день
+        window.setEmpRequest = function(empName, dayNum, reqType) {
+            const pop = document.getElementById('evPopover');
+            if (pop) pop.remove();
+
+            if (!employeeRequests[empName]) employeeRequests[empName] = {};
+            if (reqType) {
+                employeeRequests[empName][dayNum] = reqType;
+                // Если поставили выходной/отпуск — убираем сотрудника из слотов этого дня
+                const d = currentSchedule.find(x => x.day === dayNum);
+                if (d) {
+                    const slotKeys = ['morningInside','morningManager','eveningInside','eveningManager','night','night2','rdm','office','sw'];
+                    slotKeys.forEach(k => { if (d[k] === empName) d[k] = ''; });
+                }
+            } else {
+                delete employeeRequests[empName][dayNum];
+            }
+            renderSchedule();
+            saveData();
+        };
+
+        // ── ПЕЧАТЬ: 1 неделя = 1 лист А4 горизонтально ──────────
+        window.printSchedule = function() {
+            if (!currentSchedule || currentSchedule.length === 0) {
+                alert('Сначала сгенерируйте расписание.');
+                return;
+            }
+            const year = document.getElementById('yearSelect')?.value || '';
+            const monthSel = document.getElementById('monthSelect');
+            const monthName = monthSel?.options[monthSel.selectedIndex]?.text || '';
+            const allEmps = getAllEmployees();
+            const mNames = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+            const dayNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+            const chipStyle = (type) => {
+                const map = {
+                    morning:  'background:#FFF3E0;color:#E65100;border:1px solid #FFB74D;',
+                    evening:  'background:#EDE7F6;color:#4527A0;border:1px solid #9575CD;',
+                    night:    'background:#E0F7FA;color:#006064;border:1px solid #4DD0E1;',
+                    rdm:      'background:#E8F5E9;color:#1B5E20;border:1px solid #66BB6A;',
+                    office:   'background:#F3E5F5;color:#6A1B9A;border:1px solid #BA68C8;',
+                    sw:       'background:#E3F2FD;color:#0D47A1;border:1px solid #64B5F6;',
+                    vacation: 'background:#FFFDE7;color:#F57F17;border:1px solid #FFE082;',
+                    off:      'background:#F2F2F7;color:#8E8E93;border:1px solid #D1D1D6;',
+                };
+                return map[type] || 'background:#F2F2F7;color:#8E8E93;border:1px solid #D1D1D6;';
+            };
+
+            const getShiftForPrint = (emp, d) => {
+                const req = (employeeRequests[emp.name] || {})[d.day];
+                if (req === 'vacation') return { label: 'Отпуск', type: 'vacation' };
+                if (req === 'off') return { label: 'Вых', type: 'off' };
+                if (d.morningInside  === emp.name) return { label: 'Утро-И', type: 'morning' };
+                if (d.morningManager === emp.name) return { label: 'Утро-М', type: 'morning' };
+                if (d.eveningInside  === emp.name) return { label: 'Вечер-И', type: 'evening' };
+                if (d.eveningManager === emp.name) return { label: 'Вечер-М', type: 'evening' };
+                if (d.night  === emp.name) return { label: 'Ночь', type: 'night' };
+                if (d.night2 === emp.name) return { label: 'Ночь', type: 'night' };
+                if (d.rdm    === emp.name) return { label: 'RDM',  type: 'rdm'   };
+                if (d.office === emp.name) return { label: 'Офис', type: 'office' };
+                if (d.sw     === emp.name) return { label: 'SW',   type: 'sw'    };
+                return { label: 'Вых', type: 'off' };
+            };
+
+            const levelColors = { level3:'#007AFF', level4:'#5856D6', level5:'#34C759', level6:'#FF9500' };
+            const levelLabels = { level3:'Ур.3', level4:'Ур.4', level5:'Ур.5', level6:'Ур.6' };
+
+            // Строим HTML: одна таблица на неделю, каждая в div.week-page
+            let weeksHtml = '';
+            let wNum = 0;
+            for (let wi = 0; wi < currentSchedule.length; wi += 7) {
+                const week = currentSchedule.slice(wi, Math.min(wi + 7, currentSchedule.length));
+                if (!week.some(d => d.isCurrentMonth)) continue;
+                wNum++;
+                const wFirst = week[0].actualDate;
+                const wLast  = week[week.length - 1].actualDate;
+                const wLabel = `${wFirst.getDate()} ${mNames[wFirst.getMonth()]} — ${wLast.getDate()} ${mNames[wLast.getMonth()]} ${year}`;
+
+                // Шапка дней
+                let headCells = `<th style="width:160px;text-align:left;padding-left:10px;">Сотрудник</th>`;
+                week.forEach(d => {
+                    const dow = (d.actualDate.getDay() + 6) % 7; // 0=Пн
+                    const isWknd = dow >= 5;
+                    headCells += `<th style="background:${isWknd?'#2c2c2e':'#1c1c1e'};${!d.isCurrentMonth?'opacity:.6;':''}">
+                        ${dayNames[dow]}<br><span style="font-size:16px;">${d.displayDay}</span>
+                        ${!d.isCurrentMonth?`<br><span style="font-size:9px;opacity:.7;">${mNames[d.actualDate.getMonth()]}</span>`:''}
+                    </th>`;
+                });
+
+                // Строки сотрудников
+                let empRows = '';
+                allEmps.forEach((emp, ei) => {
+                    const lc = levelColors[emp.level] || '#888';
+                    const ll = levelLabels[emp.level] || '';
+                    let cells = `<td style="text-align:left;padding-left:10px;background:${ei%2===0?'#fff':'#f9f9f9'};">
+                        <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;background:${lc}20;color:${lc};font-size:9px;font-weight:800;margin-right:6px;">${ll}</span>
+                        <strong>${emp.name}</strong>
+                    </td>`;
+                    week.forEach(d => {
+                        const shift = getShiftForPrint(emp, d);
+                        const bg = ei%2===0?'#fff':'#f9f9f9';
+                        cells += `<td style="background:${bg};">
+                            <span style="display:inline-block;border-radius:5px;padding:3px 7px;font-size:11px;font-weight:700;${chipStyle(shift.type)}">${shift.label}</span>
+                        </td>`;
+                    });
+                    empRows += `<tr>${cells}</tr>`;
+                });
+
+                // Строка "Не заполнено"
+                let missingCells = `<td style="font-size:10px;color:#8E8E93;font-weight:700;text-align:left;padding-left:10px;background:#FFF8F8;">НЕ ЗАПОЛНЕНО</td>`;
+                const pboNight = document.getElementById('pboNightShifts')?.value === 'true';
+                const lastCurIdx = (() => { let ii=-1; for(let i=0;i<currentSchedule.length;i++){if(currentSchedule[i].isCurrentMonth)ii=i;} return ii; })();
+                week.forEach((d, di) => {
+                    const idx = wi + di;
+                    if (!d.isCurrentMonth) { missingCells += `<td style="background:#FFF8F8;"></td>`; return; }
+                    const needNight = pboNight || idx === lastCurIdx;
+                    const miss = [];
+                    if (!d.morningInside) miss.push({ label:'Утро-И', type:'morning' });
+                    if (!d.eveningInside) miss.push({ label:'Вечер-И', type:'evening' });
+                    if (needNight && !d.night) miss.push({ label:'Ночь', type:'night' });
+                    missingCells += `<td style="background:#FFF8F8;">` +
+                        (miss.length === 0
+                            ? `<span style="color:#34C759;font-size:16px;">✓</span>`
+                            : miss.map(m => `<span style="display:inline-block;border-radius:4px;padding:2px 5px;font-size:10px;font-weight:700;margin:1px;${chipStyle(m.type)}">${m.label}</span>`).join('')) +
+                        `</td>`;
+                });
+
+                weeksHtml += `
+                <div class="week-page">
+                    <div class="week-header">
+                        <span>Расписание ПБО · ${monthName} ${year}</span>
+                        <span style="font-size:13px;opacity:.7;">Неделя ${wNum} · ${wLabel}</span>
+                    </div>
+                    <table class="week-table">
+                        <thead><tr>${headCells}</tr></thead>
+                        <tbody>${empRows}<tr>${missingCells}</tr></tbody>
+                    </table>
+                    <div class="week-footer">Менеджеры ПБО · стр. ${wNum}</div>
+                </div>`;
+            }
+
+            const printWin = window.open('', '_blank', 'width=1400,height=900');
+            printWin.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Расписание ПБО · ${monthName} ${year}</title>
+<style>
+* { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
+body { background: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 0; color: #1c1c1e; }
+.week-page { width: 277mm; min-height: 190mm; padding: 10mm; page-break-after: always; break-after: page; page-break-inside: avoid; break-inside: avoid; display: flex; flex-direction: column; }
+.week-page:last-child { page-break-after: avoid; break-after: avoid; }
+.week-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #1c1c1e; font-size: 15px; font-weight: 700; }
+.week-footer { margin-top: auto; padding-top: 8px; border-top: 1px solid #e5e5e7; font-size: 10px; color: #8E8E93; text-align: right; }
+.week-table { width: 100%; border-collapse: collapse; }
+.week-table th { background: #1c1c1e; color: #fff; padding: 7px 5px; text-align: center; font-size: 11px; border: 1px solid #333; }
+.week-table td { padding: 6px 4px; text-align: center; border: 1px solid #e5e5e7; font-size: 11px; }
+@page { size: A4 landscape; margin: 0; }
+@media print {
+  html, body { width: 297mm; }
+  .week-page { width: 277mm; min-height: 0; height: 190mm; overflow: hidden; }
+}
+</style>
+</head>
+<body>
+${weeksHtml}
+<script>window.onload = function(){ window.print(); window.onafterprint = function(){ window.close(); }; }<\/script>
+</body></html>`);
+            printWin.document.close();
+        };
 
         window.editShift = function(day, key) {
             const d = currentSchedule.find(x => x.day === day);
@@ -7460,81 +8038,229 @@ function enforceRdmExactlyOnePerWeek() {
         function showStats() { toggleCard('statsCard'); renderStats(); }
         function renderStats() {
             const c = document.getElementById('statsContent');
-            if (!c || !currentSchedule.length) return;
-            
+            if (!c) return;
+            if (!currentSchedule.length) {
+                c.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:14px;">Расписание не сгенерировано</div>';
+                return;
+            }
+
             const allEmps = getAllEmployees();
             allEmps.sort((a, b) => {
-                const levelOrder = { 'level6': 4, 'level5': 3, 'level4': 2, 'level3': 1 };
-                return (levelOrder[b.level] || 0) - (levelOrder[a.level] || 0);
+                const lo = { 'level6': 4, 'level5': 3, 'level4': 2, 'level3': 1 };
+                return (lo[b.level] || 0) - (lo[a.level] || 0);
             });
-            
-            let html = `
-            <table class="stats-table" style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                        <th style="padding: 16px; text-align: left; font-weight: 600; font-size: 14px;">Сотрудник</th>
-                        <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 14px;">Утро</th>
-                        <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 14px;">Вечер</th>
-                        <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 14px;">Ночь</th>
-                        <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 14px;">RDM</th>
-                        <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 14px;">Офис</th>
-                        <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 14px;">SW</th>
-                        <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 14px; background: rgba(0,0,0,0.1);">Всего</th>
-                        <th style="padding: 16px; text-align: center; font-weight: 600; font-size: 14px;">Прогресс</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-            
-            allEmps.forEach((emp, idx) => {
-                let m = 0, e = 0, n = 0, r = 0, o = 0, s = 0;
+
+            // Недели: блоки по 7 дней из currentSchedule
+            const totalWeeks = Math.ceil(currentSchedule.length / 7);
+            const weeks = [];
+            for (let w = 0; w < totalWeeks; w++) {
+                const start = w * 7;
+                const end = Math.min(start + 6, currentSchedule.length - 1);
+                // Считаем только недели, у которых есть хоть один текущий месяц
+                if (currentSchedule.slice(start, end + 1).some(d => d.isCurrentMonth)) {
+                    weeks.push({ n: weeks.length + 1, start, end });
+                }
+            }
+
+            const levelColors = { level6: '#FF9500', level5: '#34C759', level4: '#5856D6', level3: '#007AFF' };
+            const levelLabels = { level6: 'Ур.6', level5: 'Ур.5', level4: 'Ур.4', level3: 'Ур.3' };
+            const monthIdx = parseInt(document.getElementById('monthSelect').value);
+
+            // Предвычислим данные по каждому сотруднику
+            const empData = allEmps.map(emp => {
+                // По типам за весь месяц
+                let mi = 0, mm = 0, ei = 0, em = 0, n = 0, r = 0, o = 0, s = 0;
                 currentSchedule.forEach(d => {
-                    if (d.morningInside === emp.name || d.morningManager === emp.name) m++;
-                    if (d.eveningInside === emp.name || d.eveningManager === emp.name) e++;
-                    if (d.night === emp.name) n++;
-                    if (d.night2 === emp.name) n++;
+                    if (!d.isCurrentMonth) return;
+                    if (d.morningInside === emp.name) mi++;
+                    if (d.morningManager === emp.name) mm++;
+                    if (d.eveningInside === emp.name) ei++;
+                    if (d.eveningManager === emp.name) em++;
+                    if (d.night === emp.name || d.night2 === emp.name) n++;
                     if (d.rdm === emp.name) r++;
                     if (d.office === emp.name) o++;
                     if (d.sw === emp.name) s++;
                 });
-                const t = m + e + n + r + o + s;
+                const total = mi + mm + ei + em + n + r + o + s;
+
+                // По неделям
+                const byWeek = weeks.map(wk => countShiftsInRange(emp.name, wk.start, wk.end));
+
+                // Норма
                 const req = employeeRequests[emp.name] || {};
                 const vDays = Object.values(req).filter(x => x === 'vacation').length;
                 const oDays = Object.values(req).filter(x => x === 'off').length;
-                const monthlyHours = productionCalendar2025[parseInt(document.getElementById('monthSelect').value)] || 160;
+                const monthlyHours = (productionCalendar2025 || {})[monthIdx] || 160;
                 const normShifts = Math.ceil(Math.max(0, monthlyHours - vDays * 8 - oDays * 8) / 8);
-                const progressPercent = normShifts > 0 ? Math.min(100, (t / normShifts) * 100) : 0;
-                const progressColor = progressPercent >= 90 ? '#34C759' : progressPercent >= 70 ? '#FF9500' : '#FF3B30';
-                const rowBg = idx % 2 === 0 ? '#ffffff' : '#f9fafb';
-                
-                const levelColors = { 'level6': '#FF9500', 'level5': '#34C759', 'level4': '#5856D6', 'level3': '#007AFF' };
-                const levelColor = levelColors[emp.level] || '#007AFF';
-                
-                html += `
-                <tr style="background: ${rowBg}; border-bottom: 1px solid #e5e7eb;">
-                    <td style="padding: 14px; border-left: 3px solid ${levelColor};">
-                        <div style="font-weight: 600; color: #1d1d1f; font-size: 15px;">${emp.name}</div>
-                        <div style="font-size: 12px; color: #86868b; margin-top: 3px;">Ур.${emp.level.replace('level','')} · Отп: ${vDays} · Вых: ${oDays}</div>
+
+                return { emp, mi, mm, ei, em, n, r, o, s, total, byWeek, normShifts, vDays, oDays };
+            });
+
+            // Считаем ожидаемые смены в неделю (5 для level4/5/6, иначе ~norm/weeks)
+            function expectedWeekly(emp) {
+                return (emp.level === 'level4' || emp.level === 'level5' || emp.level === 'level6') ? 5 : null;
+            }
+
+            function weekCellStyle(count, exp) {
+                if (count === 0) return 'color:#c0c0c0;';
+                if (exp === null) return 'color:var(--text);font-weight:600;';
+                if (count === exp) return 'color:#34C759;font-weight:700;';
+                if (count > exp) return 'color:#FF3B30;font-weight:700;';
+                return 'color:#FF9500;font-weight:600;';
+            }
+
+            const shiftTag = (label, count, color) => count
+                ? `<span style="display:inline-flex;align-items:center;gap:3px;background:${color}18;color:${color};border-radius:5px;padding:2px 7px;font-size:11px;font-weight:600;margin:2px;">${label} ${count}</span>`
+                : '';
+
+            // Итоговый HTML
+            const statsStyles = `
+                <style>
+                .st-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:16px 20px 0;background:var(--surface);}
+                .st-tab{padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-muted);transition:all .15s;border-radius:6px 6px 0 0;margin-bottom:-1px;}
+                .st-tab.active{color:var(--text);border-bottom-color:var(--primary);background:rgba(0,0,0,0.03);}
+                .st-panel{display:none;padding:0;}.st-panel.active{display:block;}
+                .st-summary{display:flex;gap:0;padding:16px 20px;border-bottom:1px solid var(--border);}
+                .st-kpi{flex:1;text-align:center;padding:10px 8px;border-right:1px solid var(--border);}
+                .st-kpi:last-child{border-right:none;}
+                .st-kpi-val{font-size:22px;font-weight:700;color:var(--text);}
+                .st-kpi-lbl{font-size:11px;color:var(--text-muted);margin-top:2px;}
+                .st-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+                .st-tbl th{padding:10px 12px;text-align:center;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:1;}
+                .st-tbl th:first-child{text-align:left;}
+                .st-tbl td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle;}
+                .st-tbl td:first-child{text-align:left;}
+                .st-tbl tr:last-child td{border-bottom:none;}
+                .st-tbl tr:hover td{background:rgba(0,0,0,0.02);}
+                .st-emp-name{font-weight:600;font-size:14px;color:var(--text);}
+                .st-emp-sub{font-size:11px;color:var(--text-muted);margin-top:2px;}
+                .st-lvl{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;}
+                .st-total{font-weight:700;font-size:15px;}
+                .st-prog{display:flex;align-items:center;gap:8px;}
+                .st-prog-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+                .st-prog-fill{height:100%;border-radius:3px;transition:width .3s;}
+                .st-scroll{overflow:auto;max-height:420px;}
+                </style>`;
+
+            // KPI summary
+            const totalAssigned = empData.reduce((s, d) => s + d.total, 0);
+            const missing = countMissingMandatorySlots();
+            const totalEmps = allEmps.length;
+            const missingColor = missing === 0 ? '#34C759' : missing < 10 ? '#FF9500' : '#FF3B30';
+
+            const summaryHtml = `
+            <div class="st-summary">
+                <div class="st-kpi"><div class="st-kpi-val">${totalEmps}</div><div class="st-kpi-lbl">Сотрудников</div></div>
+                <div class="st-kpi"><div class="st-kpi-val">${totalAssigned}</div><div class="st-kpi-lbl">Смен назначено</div></div>
+                <div class="st-kpi"><div class="st-kpi-val" style="color:${missingColor}">${missing}</div><div class="st-kpi-lbl">Незаполненных слотов</div></div>
+                <div class="st-kpi"><div class="st-kpi-val">${weeks.length}</div><div class="st-kpi-lbl">Недель в месяце</div></div>
+            </div>`;
+
+            // Tab 1: По неделям
+            let weekHeads = weeks.map(w => `<th>Нед. ${w.n}</th>`).join('');
+            let weekRows = empData.map(d => {
+                const exp = expectedWeekly(d.emp);
+                const lc = levelColors[d.emp.level] || '#888';
+                const weekCells = d.byWeek.map(cnt => {
+                    // 0 смен за рабочую неделю — красный фон-предупреждение
+                    const zeroWarn = cnt === 0 ? 'background:rgba(255,59,48,0.10);color:#FF3B30;font-weight:700;' : '';
+                    return `<td style="${zeroWarn || weekCellStyle(cnt, exp)}">${cnt === 0 ? '⚠' : (cnt || '—')}</td>`;
+                }).join('');
+                const pct = d.normShifts > 0 ? Math.min(100, (d.total / d.normShifts) * 100) : 0;
+                const pc = pct >= 90 ? '#34C759' : pct >= 60 ? '#FF9500' : '#FF3B30';
+                return `<tr>
+                    <td>
+                        <div class="st-emp-name">${d.emp.name}<span class="st-lvl" style="background:${lc}20;color:${lc};">${levelLabels[d.emp.level]||''}</span></div>
+                        <div class="st-emp-sub">${d.vDays ? `Отп: ${d.vDays}` : ''}${d.oDays ? ` Вых: ${d.oDays}` : ''}</div>
                     </td>
-                    <td style="padding: 14px; text-align: center; color: #FF9500; font-weight: 600; font-size: 15px;">${m || '—'}</td>
-                    <td style="padding: 14px; text-align: center; color: #5856D6; font-weight: 600; font-size: 15px;">${e || '—'}</td>
-                    <td style="padding: 14px; text-align: center; color: #5AC8FA; font-weight: 600; font-size: 15px;">${n || '—'}</td>
-                    <td style="padding: 14px; text-align: center; color: #34C759; font-weight: 600; font-size: 15px;">${r || '—'}</td>
-                    <td style="padding: 14px; text-align: center; color: #AF52DE; font-weight: 600; font-size: 15px;">${o || '—'}</td>
-                    <td style="padding: 14px; text-align: center; color: #007AFF; font-weight: 600; font-size: 15px;">${s || '—'}</td>
-                    <td style="padding: 14px; text-align: center; background: rgba(0,0,0,0.02); font-weight: 700; font-size: 1.2rem; color: ${progressColor};">${t}</td>
-                    <td style="padding: 14px;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="flex: 1; background: #e5e7eb; border-radius: 4px; height: 8px; overflow: hidden;">
-                                <div style="background: ${progressColor}; height: 100%; width: ${progressPercent}%; transition: width 0.3s;"></div>
-                            </div>
-                            <span style="font-size: 13px; font-weight: 600; color: ${progressColor}; min-width: 55px; text-align: right;">${t}/${normShifts}</span>
+                    ${weekCells}
+                    <td class="st-total" style="color:${pc}">${d.total}</td>
+                    <td>
+                        <div class="st-prog">
+                            <div class="st-prog-bar"><div class="st-prog-fill" style="width:${pct}%;background:${pc};"></div></div>
+                            <span style="font-size:12px;font-weight:600;color:${pc};min-width:42px;">${d.total}/${d.normShifts}</span>
                         </div>
                     </td>
                 </tr>`;
-            });
-            
-            html += '</tbody></table>';
-            c.innerHTML = html;
+            }).join('');
+
+            // Итоговая строка: сумма смен по каждой неделе
+            const weekTotals = weeks.map((_, wi) => empData.reduce((s, d) => s + (d.byWeek[wi] || 0), 0));
+            const totalRow = `<tr style="background:rgba(var(--accent-rgb),0.06);font-weight:700;border-top:2px solid var(--border);">
+                <td style="padding-left:20px;font-size:12px;color:var(--text-muted);letter-spacing:.3px;text-transform:uppercase;">ИТОГО</td>
+                ${weekTotals.map(t => `<td style="font-weight:800;">${t}</td>`).join('')}
+                <td style="font-weight:800;">${empData.reduce((s,d)=>s+d.total,0)}</td>
+                <td></td>
+            </tr>`;
+
+            const tab1 = `
+            <div class="st-scroll">
+            <table class="st-tbl">
+                <thead><tr>
+                    <th style="min-width:160px;">Сотрудник</th>
+                    ${weekHeads}
+                    <th>Итого</th>
+                    <th style="min-width:130px;">Норма</th>
+                </tr></thead>
+                <tbody>${weekRows}${totalRow}</tbody>
+            </table>
+            </div>`;
+
+            // Tab 2: По типам
+            let typeRows = empData.map((d, idx) => {
+                const lc = levelColors[d.emp.level] || '#888';
+                const pct = d.normShifts > 0 ? Math.min(100, (d.total / d.normShifts) * 100) : 0;
+                const pc = pct >= 90 ? '#34C759' : pct >= 60 ? '#FF9500' : '#FF3B30';
+                const tags = [
+                    shiftTag('Утро-И', d.mi, '#FF9500'),
+                    shiftTag('Утро-М', d.mm, '#FF9500'),
+                    shiftTag('Вечер-И', d.ei, '#5856D6'),
+                    shiftTag('Вечер-М', d.em, '#5856D6'),
+                    shiftTag('Ночь', d.n, '#5AC8FA'),
+                    shiftTag('RDM', d.r, '#34C759'),
+                    shiftTag('Офис', d.o, '#AF52DE'),
+                    shiftTag('SW', d.s, '#007AFF'),
+                ].filter(Boolean).join('');
+                return `<tr>
+                    <td>
+                        <div class="st-emp-name">${d.emp.name}<span class="st-lvl" style="background:${lc}20;color:${lc};">${levelLabels[d.emp.level]||''}</span></div>
+                    </td>
+                    <td style="text-align:left;">${tags || '<span style="color:var(--text-muted);font-size:12px;">нет смен</span>'}</td>
+                    <td class="st-total" style="color:${pc}">${d.total}</td>
+                    <td>
+                        <div class="st-prog">
+                            <div class="st-prog-bar"><div class="st-prog-fill" style="width:${pct}%;background:${pc};"></div></div>
+                            <span style="font-size:12px;font-weight:600;color:${pc};min-width:42px;">${d.total}/${d.normShifts}</span>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            const tab2 = `
+            <div class="st-scroll">
+            <table class="st-tbl">
+                <thead><tr>
+                    <th style="min-width:160px;">Сотрудник</th>
+                    <th style="text-align:left;">Типы смен</th>
+                    <th>Итого</th>
+                    <th style="min-width:130px;">Норма</th>
+                </tr></thead>
+                <tbody>${typeRows}</tbody>
+            </table>
+            </div>`;
+
+            c.innerHTML = statsStyles + summaryHtml + `
+            <div class="st-tabs">
+                <div class="st-tab active" onclick="statsShowTab(0,this)">По неделям</div>
+                <div class="st-tab" onclick="statsShowTab(1,this)">По типам смен</div>
+            </div>
+            <div class="st-panel active" id="stPanel0">${tab1}</div>
+            <div class="st-panel" id="stPanel1">${tab2}</div>`;
+        }
+
+        function statsShowTab(idx, el) {
+            document.querySelectorAll('.st-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+            document.querySelectorAll('.st-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
         }
 
         // Сводка смен в консоль отключена для устранения лагов
@@ -7984,10 +8710,51 @@ function enforceRdmExactlyOnePerWeek() {
             showConfirmModal('Очистить расписание?', confirmed => {
                 if (confirmed) {
                     currentSchedule = [];
+                    /* schedule cleared */
                     document.getElementById('scheduleContainer').innerHTML = '<p class="placeholder-text">Нажмите "Генерировать" для создания расписания</p>';
                     showMessage('Расписание очищено!');
                 }
             });
+        }
+
+        function exportCsv() {
+            if (!currentSchedule || !currentSchedule.length) {
+                showMessage('Нет расписания для экспорта', true);
+                return;
+            }
+            const slots = [
+                { key: 'night',          label: 'Ночь 1' },
+                { key: 'night2',         label: 'Ночь 2' },
+                { key: 'morningInside',  label: 'Утро (inside)' },
+                { key: 'morningManager', label: 'Утро (manager)' },
+                { key: 'eveningInside',  label: 'Вечер (inside)' },
+                { key: 'eveningManager', label: 'Вечер (manager)' },
+                { key: 'rdm',            label: 'РДМ' },
+                { key: 'office',         label: 'Офис' },
+                { key: 'sw',             label: 'SW' },
+            ];
+            const header = ['Дата', 'День', ...slots.map(s => s.label)];
+            const rows = currentSchedule
+                .filter(d => d.isCurrentMonth)
+                .map(d => [
+                    d.actualDate || '',
+                    d.displayDay || '',
+                    ...slots.map(s => d[s.key] || '')
+                ]);
+            const csvContent = [header, ...rows]
+                .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+                .join('\r\n');
+            const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const ySel = document.getElementById('yearSelect');
+            const mSel = document.getElementById('monthSelect');
+            const monthName = mSel ? mSel.options[mSel.selectedIndex]?.text : '';
+            const year = ySel ? ySel.value : '';
+            a.href = url;
+            a.download = `Расписание_${monthName}_${year}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         // --- Конвертация форматов employees ---
@@ -8042,16 +8809,25 @@ function enforceRdmExactlyOnePerWeek() {
             const mandatoryOrder = ['morningInside','morningManager','eveningInside','eveningManager','night','night2'];
             const pboNightShifts = document.getElementById('pboNightShifts')?.value === 'true';
             const lastCurrentIdx = (() => { let ii = -1; for (let i = 0; i < currentSchedule.length; i++) { if (currentSchedule[i].isCurrentMonth) ii = i; } return ii; })();
+            const nightsInWeek = (name) => { let c=0; for(let i=s;i<=e;i++){const d=currentSchedule[i];if(d&&(d.night===name||d.night2===name))c++;} return c; };
+            const morningsInWeek = (name) => { let c=0; for(let i=s;i<=e;i++){const d=currentSchedule[i];if(d&&(d.morningInside===name||d.morningManager===name))c++;} return c; };
+            const eveningsInWeek = (name) => { let c=0; for(let i=s;i<=e;i++){const d=currentSchedule[i];if(d&&(d.eveningInside===name||d.eveningManager===name))c++;} return c; };
             for (let idx = s; idx <= e; idx++) {
                 const d = currentSchedule[idx]; if (!d) continue;
                 for (const key of mandatoryOrder) {
                     if (d[key]) continue;
+                    const isNightKey = key === 'night' || key === 'night2';
+                    const isMorningKey = key === 'morningInside' || key === 'morningManager';
+                    const isEveningKey = key === 'eveningInside' || key === 'eveningManager';
                     const cand = getAllEmployees().find(emp => {
                         if (isEmployeeOnRequest(emp.name, d.day, 'off')) return false;
                         if (hasShiftOnDay(emp.name, d.day)) return false;
                         if (!isSlotAllowedForEmployee(emp, key, idx)) return false;
                         if (!canWorkAfterShiftIdx(emp.name, idx, key)) return false;
                         if (countShiftsInWeek(emp.name, idx) >= 5) return false;
+                        if (isNightKey && nightsInWeek(emp.name) >= 2) return false;
+                        if (isMorningKey && morningsInWeek(emp.name) >= 2) return false;
+                        if (isEveningKey && eveningsInWeek(emp.name) >= 2) return false;
                         return true;
                     });
                     if (cand) d[key] = cand.name;
@@ -8060,20 +8836,32 @@ function enforceRdmExactlyOnePerWeek() {
         }
 
         function tryTargetedReplacementsForWeek(s, e, maxAttempts = 500) {
+            const pboNightShifts = document.getElementById('pboNightShifts')?.value === 'true';
+            const lastCurrentIdx = (() => { let ii = -1; for (let i = 0; i < currentSchedule.length; i++) { if (currentSchedule[i].isCurrentMonth) ii = i; } return ii; })();
             const lowPriority = ['sw','office','rdm','night2'];
-            const mandatoryKeys = ['morningInside','morningManager','eveningInside','eveningManager','night'];
+            const mandatoryKeys = ['morningInside','morningManager','eveningInside','eveningManager',
+                ...(pboNightShifts ? ['night'] : [])];
+            const nightsInWeek = (name) => { let c=0; for(let i=s;i<=e;i++){const d=currentSchedule[i];if(d&&(d.night===name||d.night2===name))c++;} return c; };
+            const morningsInWeek = (name) => { let c=0; for(let i=s;i<=e;i++){const d=currentSchedule[i];if(d&&(d.morningInside===name||d.morningManager===name))c++;} return c; };
+            const eveningsInWeek = (name) => { let c=0; for(let i=s;i<=e;i++){const d=currentSchedule[i];if(d&&(d.eveningInside===name||d.eveningManager===name))c++;} return c; };
             let attempts = 0;
             for (let di = s; di <= e && attempts < maxAttempts; di++) {
                 const day = currentSchedule[di]; if (!day) continue;
                 for (const key of mandatoryKeys) {
                     if (day[key]) continue;
                     attempts++;
+                    const isNightKey = key === 'night' || key === 'night2';
+                    const isMorningKey = key === 'morningInside' || key === 'morningManager';
+                    const isEveningKey = key === 'eveningInside' || key === 'eveningManager';
                     const cand = getAllEmployees().find(emp => {
                         if (isEmployeeOnRequest(emp.name, day.day, 'off')) return false;
                         if (hasShiftOnDay(emp.name, day.day)) return false;
                         if (!isSlotAllowedForEmployee(emp, key, di)) return false;
                         if (!canWorkAfterShiftIdx(emp.name, di, key)) return false;
                         if (countShiftsInWeek(emp.name, di) >= 5) return false;
+                        if (isNightKey && nightsInWeek(emp.name) >= 2) return false;
+                        if (isMorningKey && morningsInWeek(emp.name) >= 2) return false;
+                        if (isEveningKey && eveningsInWeek(emp.name) >= 2) return false;
                         return true;
                     });
                     if (!cand) continue;
@@ -8132,7 +8920,7 @@ function enforceRdmExactlyOnePerWeek() {
         function assignNightShiftsForWeek(s, e) {
             const pboNightShifts = document.getElementById('pboNightShifts')?.value === 'true';
             if (!pboNightShifts) {
-                for (let i = s; i <= e; i++) { if (currentSchedule[i]) { currentSchedule[i].night = null; currentSchedule[i].night2 = null; } }
+                for (let i = s; i <= e; i++) { if (currentSchedule[i]) { currentSchedule[i].night = ""; currentSchedule[i].night2 = ""; } }
                 try { ensureDoubleNightLastDay(); } catch (e) { /* ignore */ }
                 return;
             }
@@ -8181,40 +8969,404 @@ function enforceRdmExactlyOnePerWeek() {
         }
 
         // Заполнить оставшиеся смены только для указанной недели (вызывает уже существующие per-week функции)
+        // ═══════════════════════════════════════════════════════════════
+        // planMonthlyRotation: предварительно планирует для каждого
+        // сотрудника по каждому дню месяца тип смены:
+        //   'morning' | 'evening' | 'off'
+        // Правила политики:
+        //   - 2 выходных подряд в неделю
+        //   - хотя бы 1 раз в месяц — сб+вс выходные
+        //   - не более 3 выходных подряд (конец одной + начало следующей)
+        //   - 2+2 ротация: 2 утренних, 2 вечерних, 1 гибкий (=утро)
+        //   - после ночной смены — следующий день выходной
+        // ═══════════════════════════════════════════════════════════════
+        function planMonthlyRotation() {
+            const allEmps = getAllEmployees();
+            const totalWeeks = Math.ceil(currentSchedule.length / 7);
+            window._empRotationPlan = {};
+
+            allEmps.forEach((emp, empIdx) => {
+                const dayPlan = {}; // dayIndex → 'morning' | 'evening' | 'off'
+
+                // Стабильный хэш имени для детерминированного смещения ротации
+                const empHash = emp.name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+
+                let hadWeekendOff = false; // был ли уже Сб+Вс выходной в этом месяце
+                let prevWeekTrailingOffs = 0; // сколько выходных было в конце предыдущей недели
+
+                for (let w = 0; w < totalWeeks; w++) {
+                    const wStart = w * 7;
+                    const wEnd = Math.min(wStart + 6, currentSchedule.length - 1);
+                    const weekDays = currentSchedule.slice(wStart, wEnd + 1);
+                    const weekLen = weekDays.length;
+
+                    // Вынужденные выходные: запросы + день после ночной смены + уже назначенные смены
+                    const forcedOff = new Set();
+                    // forcedWork = только ВЫСОКОПРИОРИТЕТНЫЕ смены (ночь, утро, вечер, менеджер)
+                    // office/rdm/sw НЕ блокируют выходной — они будут очищены если день станет выходным
+                    const highPrioKeys = ['night','night2','morningInside','morningManager','eveningInside','eveningManager'];
+                    const lowPrioKeys  = ['office','rdm','sw'];
+                    const forcedWork = new Set();
+                    weekDays.forEach((d, di) => {
+                        if (isEmployeeOnRequest(emp.name, d.day, 'off')) forcedOff.add(di);
+                        if (isEmployeeOnRequest(emp.name, d.day, 'vacation')) forcedOff.add(di);
+                        // Только высокоприоритетные смены делают день "рабочим"
+                        if (highPrioKeys.some(k => d[k] === emp.name)) forcedWork.add(di);
+                    });
+                    // Если предыдущий день был ночью этого сотрудника — первый день недели выходной
+                    if (wStart > 0) {
+                        const prevD = currentSchedule[wStart - 1];
+                        if (prevD && (prevD.night === emp.name || prevD.night2 === emp.name)) {
+                            forcedOff.add(0);
+                            forcedWork.delete(0);
+                        }
+                    }
+
+                    // Выбираем пару выходных (2 подряд)
+                    let offPair = null;
+
+                    // Хелпер: можно ли день стать выходным (не занят назначенной сменой)
+                    const canBeOff = (di) => !forcedWork.has(di);
+
+                    // Если уже есть вынужденные выходные — строим пару вокруг них
+                    const forcedArr = [...forcedOff].filter(di => di < weekLen).sort((a,b) => a-b);
+                    if (forcedArr.length >= 2) {
+                        offPair = [forcedArr[0], forcedArr[1]];
+                    } else if (forcedArr.length === 1) {
+                        const fd = forcedArr[0];
+                        if (fd + 1 < weekLen && canBeOff(fd + 1)) offPair = [fd, fd + 1];
+                        else if (fd - 1 >= 0 && canBeOff(fd - 1)) offPair = [fd - 1, fd];
+                        else offPair = [fd, fd];
+                    }
+
+                    // Приоритет: Сб+Вс если ещё не было в этом месяце
+                    if (!offPair && !hadWeekendOff) {
+                        for (let di = 0; di < weekLen - 1; di++) {
+                            const dow1 = weekDays[di].actualDate.getDay();   // 6=Сб, 0=Вс
+                            const dow2 = weekDays[di+1].actualDate.getDay();
+                            if (dow1 === 6 && dow2 === 0 && canBeOff(di) && canBeOff(di+1)) {
+                                // Убедимся что не создаём 4+ подряд с предыдущей неделей
+                                if (di === 0 && prevWeekTrailingOffs >= 2) break;
+                                offPair = [di, di + 1];
+                                hadWeekendOff = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Ротация: смещение пары выходных меняется каждую неделю
+                    if (!offPair) {
+                        const rotStep = (empHash * 3 + w * 2) % Math.max(weekLen - 1, 1);
+                        for (let attempt = 0; attempt < weekLen - 1; attempt++) {
+                            const pairStart = (rotStep + attempt) % (weekLen - 1);
+                            // Не создаём 4+ выходных подряд (конец пред. недели + начало этой)
+                            if (pairStart === 0 && prevWeekTrailingOffs >= 2) continue;
+                            // Оба дня должны быть свободны от назначений
+                            if (!canBeOff(pairStart) || !canBeOff(pairStart + 1)) continue;
+                            offPair = [pairStart, pairStart + 1];
+                            break;
+                        }
+                        // Фолбэк — любые 2 свободных дня
+                        if (!offPair) {
+                            for (let di = 0; di < weekLen - 1; di++) {
+                                if (canBeOff(di) && canBeOff(di+1)) { offPair = [di, di+1]; break; }
+                            }
+                        }
+                        if (!offPair) offPair = [weekLen - 2, weekLen - 1];
+                    }
+
+                    // Итоговое множество выходных (не включаем дни где уже назначена смена)
+                    const rawOff = new Set([...forcedOff, offPair[0], offPair[1]].filter(di => di >= 0 && di < weekLen));
+                    const offSet = new Set([...rawOff].filter(di => !forcedWork.has(di) || forcedOff.has(di)));
+
+                    // Считаем trailing offs для следующей недели
+                    prevWeekTrailingOffs = 0;
+                    for (let di = weekLen - 1; di >= 0; di--) {
+                        if (offSet.has(di)) prevWeekTrailingOffs++;
+                        else break;
+                    }
+
+                    // Рабочие дни
+                    const workDays = [];
+                    for (let di = 0; di < weekLen; di++) {
+                        if (!offSet.has(di)) workDays.push(di);
+                    }
+
+                    // Ротация 2У+2В: фаза = хэш + номер недели
+                    // 0,1 → утро; 2,3 → вечер; 4+ → утро (если 5 рабочих дней)
+                    const phase = (empHash + w) % 4;
+                    workDays.forEach((di, wi) => {
+                        const p = (wi + phase) % 4;
+                        dayPlan[wStart + di] = p < 2 ? 'morning' : 'evening';
+                    });
+                    offSet.forEach(di => { dayPlan[wStart + di] = 'off'; });
+                }
+
+                window._empRotationPlan[emp.name] = dayPlan;
+            });
+
+            // После построения плана — очищаем низкоприоритетные смены (office/rdm/sw)
+            // на тех днях, которые план пометил как выходные, чтобы Сб+Вс реально были свободны
+            const lowPrioKeysClean = ['office','rdm','sw'];
+            getAllEmployees().forEach(emp => {
+                const plan = window._empRotationPlan[emp.name];
+                if (!plan) return;
+                Object.entries(plan).forEach(([idxStr, type]) => {
+                    if (type !== 'off') return;
+                    const idx = Number(idxStr);
+                    const d = currentSchedule[idx];
+                    if (!d) return;
+                    lowPrioKeysClean.forEach(k => { if (d[k] === emp.name) d[k] = ''; });
+                });
+            });
+        }
+
+        // Перераспределяет нагрузку когда у ключевого сотрудника запрошен выходной.
+        // Для каждого дня где есть запрос на выходной/отпуск:
+        //   - находит план этого сотрудника на день (morning/evening)
+        //   - меняет план другому доступному сотруднику того же уровня с меньшей нагрузкой
+        function redistributeOffRequests() {
+            if (!window._empRotationPlan) return;
+            const allEmps = getAllEmployees();
+            const plan = window._empRotationPlan;
+
+            for (let i = 0; i < currentSchedule.length; i++) {
+                const d = currentSchedule[i];
+                if (!d.isCurrentMonth) continue;
+                const w = Math.floor(i / 7);
+                const wS = w * 7;
+                const wE = Math.min(wS + 6, currentSchedule.length - 1);
+
+                allEmps.forEach(emp => {
+                    const isOff = isEmployeeOnRequest(emp.name, d.day, 'off') || isEmployeeOnRequest(emp.name, d.day, 'vacation');
+                    if (!isOff) return;
+                    const plannedType = plan[emp.name]?.[i];
+                    if (!plannedType || plannedType === 'off') return;
+
+                    // Снимаем с этого дня
+                    plan[emp.name][i] = 'off';
+
+                    // Ищем замену: сотрудник того же или совместимого уровня,
+                    // у кого сегодня нет плана (нет смены) или стоит 'off' по ротации (не по запросу)
+                    const sameLevel = allEmps.filter(e =>
+                        e.name !== emp.name &&
+                        e.level === emp.level &&
+                        !isEmployeeOnRequest(e.name, d.day, 'off') &&
+                        !isEmployeeOnRequest(e.name, d.day, 'vacation') &&
+                        (plan[e.name]?.[i] === 'off' || !plan[e.name]?.[i]) // у них плановый выходной
+                    );
+
+                    // Выбираем того у кого меньше всего смен за эту неделю
+                    sameLevel.sort((a, b) => {
+                        const cntA = Object.entries(plan[a.name] || {}).filter(([k, v]) => +k >= wS && +k <= wE && v !== 'off').length;
+                        const cntB = Object.entries(plan[b.name] || {}).filter(([k, v]) => +k >= wS && +k <= wE && v !== 'off').length;
+                        return cntA - cntB;
+                    });
+
+                    if (sameLevel.length > 0) {
+                        plan[sameLevel[0].name][i] = plannedType;
+                    }
+                });
+            }
+        }
+
         function fillRemainingShiftsForWeek(s, e) {
-            try { autotestLog({ action: 'fillRemainingShiftsForWeek_start', weekStart: s, weekEnd: e }); } catch (e) {}
-            console.debug('fillRemainingShiftsForWeek start', s, e);
+            const pboNightShifts = document.getElementById('pboNightShifts')?.value === 'true';
+            const lastCurrentIdx = (() => { let ii = -1; for (let i = 0; i < currentSchedule.length; i++) { if (currentSchedule[i].isCurrentMonth) ii = i; } return ii; })();
+            const plan = window._empRotationPlan || {};
+            const getType = (name, idx) => plan[name]?.[idx] ?? null;
 
-            // 1) level3 менеджеры, не canInside, не nightShifts -> менеджер утро/вечер
-            try { assignLevel3ManagerFiltered(s, e, emp => !emp.canInside && !emp.nightShifts); } catch (err) { console.error(err); }
+            // Перемешать массив для случайности при каждой генерации
+            const shuffle = (arr) => {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            };
 
-            // 2) level3, не canInside, но nightShifts -> ночи (попытка)
-            try { assignNightShiftsForWeekPrefer(s, e, emp => emp.level === 'level3' && !emp.canInside && emp.nightShifts); } catch (err) { console.error(err); }
+            // Проверка: можно ли поставить сотрудника на слот в день i
+            const canAssign = (emp, i, slotKey) => {
+                const d = currentSchedule[i];
+                if (!d || !d.isCurrentMonth) return false;
+                if (d[slotKey]) return false; // слот уже занят
+                if (getType(emp.name, i) === 'off') return false;
+                if (isEmployeeOnRequest(emp.name, d.day, 'off')) return false;
+                if (countShiftsOnDayRecord(emp.name, d) > 0) return false;
+                if (countShiftsInWeek(emp.name, i) >= 5) return false;
+                if (!canWorkAfterShiftIdx(emp.name, i, slotKey)) return false;
+                if (!isSlotAllowedForEmployee(emp, slotKey, i)) return false;
+                return true;
+            };
 
-            // 3) level3, которые могут инсайды -> SW
-            try { assignLevel3SwShiftsFiltered(s, e, emp => emp.canInside); } catch (err) { console.error(err); }
+            // Счётчики за неделю [s..e]
+            const countWSlots = (name, keys) => {
+                let c = 0;
+                for (let i = s; i <= e; i++) {
+                    const d = currentSchedule[i];
+                    keys.forEach(k => { if (d[k] === name) c++; });
+                }
+                return c;
+            };
 
-            // 4) инсайды для уровней 5 и 4
-            try { assignLevel5InsideShifts(s, e); } catch (err) { console.error(err); }
-            try { assignLevel4InsideShifts(s, e); } catch (err) { console.error(err); }
+            // ── ШАГ 1: Level4/5 — гарантированные inside-смены по плану ────────
+            // Сначала level5, потом level4 — чтобы старшие получили слоты первыми.
+            // Каждый: на дни с планом 'morning' → morningInside, 'evening' → eveningInside.
+            // Цель: 2 утра + 2 вечера = 4 inside за неделю.
+            [...(employees.level5||[]), ...(employees.level4||[])].forEach(emp => {
+                if (!emp.canInside) return;
 
-            // 5) RDM для уровней 4/5
-            try { assignHighLevelRdm(s, e); } catch (err) { console.error(err); }
+                const morningDays = [];
+                const eveningDays = [];
+                for (let i = s; i <= e; i++) {
+                    const t = getType(emp.name, i);
+                    const d = currentSchedule[i];
+                    if (!d || !d.isCurrentMonth) continue;
+                    if (isEmployeeOnRequest(emp.name, d.day, 'off')) continue;
+                    if (t === 'morning') morningDays.push(i);
+                    else if (t === 'evening') eveningDays.push(i);
+                }
 
-            // 6) если инсайды не назначились — забираем из level3 с canInside
-            try { fillInsidesFromLevel3(s, e); } catch (err) { console.error(err); }
+                let mDone = 0;
+                for (const i of morningDays) {
+                    if (mDone >= 2) break;
+                    if (canAssign(emp, i, 'morningInside')) {
+                        currentSchedule[i].morningInside = emp.name;
+                        mDone++;
+                    }
+                }
+                // Не хватило дней с планом 'morning' — берём любые свободные дни
+                if (mDone < 2) {
+                    for (let i = s; i <= e && mDone < 2; i++) {
+                        if (morningDays.includes(i)) continue;
+                        if (canAssign(emp, i, 'morningInside')) {
+                            currentSchedule[i].morningInside = emp.name;
+                            mDone++;
+                        }
+                    }
+                }
 
-            // 7) если остались ночи — перекрываем level4/5
-            try { fillRemainingNightsWithHighLevels(s, e); } catch (err) { console.error(err); }
+                let eDone = 0;
+                for (const i of eveningDays) {
+                    if (eDone >= 2) break;
+                    if (canAssign(emp, i, 'eveningInside')) {
+                        currentSchedule[i].eveningInside = emp.name;
+                        eDone++;
+                    }
+                }
+                if (eDone < 2) {
+                    for (let i = s; i <= e && eDone < 2; i++) {
+                        if (eveningDays.includes(i)) continue;
+                        if (canAssign(emp, i, 'eveningInside')) {
+                            currentSchedule[i].eveningInside = emp.name;
+                            eDone++;
+                        }
+                    }
+                }
+            });
 
-            // 8) офис и оставшийся SW
-            try { assignLevel6OfficeShifts(s, e); } catch (err) { console.error(err); }
-            try { assignLevel3SwShifts(s, e); } catch (err) { console.error(err); }
+            // ── ШАГ 2: Level4/5 — RDM (1 в неделю, 5-я смена) ──────────────────
+            [...(employees.level5||[]), ...(employees.level4||[])].forEach(emp => {
+                const hasRdm = () => { for(let i=s;i<=e;i++){if(currentSchedule[i].rdm===emp.name)return true;} return false; };
+                if (hasRdm()) return;
+                for (let i = s; i <= e; i++) {
+                    if (!currentSchedule[i].rdm && canAssign(emp, i, 'rdm')) {
+                        currentSchedule[i].rdm = emp.name;
+                        break;
+                    }
+                }
+            });
+
+            // ── ШАГ 3: Level6 — office до 5 смен ────────────────────────────────
+            (employees.level6||[]).forEach(emp => {
+                for (let i = s; i <= e; i++) {
+                    if (countShiftsInWeek(emp.name, i) >= 5) break;
+                    if (canAssign(emp, i, 'office')) {
+                        currentSchedule[i].office = emp.name;
+                    }
+                }
+                // Level6 с canInside — добавить до 1 inside-смены если нужно до 5
+                if (emp.canInside && countShiftsInWeek(emp.name, s) < 5) {
+                    for (let i = s; i <= e; i++) {
+                        if (countWSlots(emp.name, ['morningInside','eveningInside']) >= 1) break;
+                        if (canAssign(emp, i, 'morningInside')) { currentSchedule[i].morningInside = emp.name; break; }
+                        if (canAssign(emp, i, 'eveningInside')) { currentSchedule[i].eveningInside = emp.name; break; }
+                    }
+                }
+            });
+
+            // ── ШАГ 4: Level3 — morningManager / eveningManager ─────────────────
+            // Используем план ротации: 'morning' → утро, 'evening' → вечер.
+            // Перемешиваем для разнообразия при повторной генерации.
+            const managerPool = shuffle([...(employees.level3||[]), ...(employees.level2||[])]);
+            for (let i = s; i <= e; i++) {
+                const d = currentSchedule[i];
+                if (!d.isCurrentMonth) continue;
+
+                if (!d.morningManager) {
+                    // Предпочитаем тех у кого план 'morning', сортируем по нагрузке
+                    const cands = managerPool
+                        .filter(emp => canAssign(emp, i, 'morningManager'))
+                        .sort((a, b) => {
+                            const ap = getType(a.name, i) === 'morning' ? 0 : 1;
+                            const bp = getType(b.name, i) === 'morning' ? 0 : 1;
+                            if (ap !== bp) return ap - bp;
+                            return countShiftsInWeek(a.name, i) - countShiftsInWeek(b.name, i);
+                        });
+                    if (cands.length > 0) d.morningManager = cands[0].name;
+                }
+
+                if (!d.eveningManager) {
+                    const exc = [d.morningManager].filter(Boolean);
+                    const cands = managerPool
+                        .filter(emp => !exc.includes(emp.name) && canAssign(emp, i, 'eveningManager'))
+                        .sort((a, b) => {
+                            const ap = getType(a.name, i) === 'evening' ? 0 : 1;
+                            const bp = getType(b.name, i) === 'evening' ? 0 : 1;
+                            if (ap !== bp) return ap - bp;
+                            return countShiftsInWeek(a.name, i) - countShiftsInWeek(b.name, i);
+                        });
+                    if (cands.length > 0) d.eveningManager = cands[0].name;
+                }
+            }
+
+            // ── ШАГ 5: Ночи ──────────────────────────────────────────────────────
+            const nightPool = shuffle([
+                ...(employees.level3||[]).filter(e => e.nightShifts),
+                ...(employees.level4||[]).filter(e => e.nightShifts),
+                ...(employees.level5||[]).filter(e => e.nightShifts),
+            ]);
+            for (let i = s; i <= e; i++) {
+                const d = currentSchedule[i];
+                if (!d.isCurrentMonth) continue;
+                if (!pboNightShifts && i !== lastCurrentIdx) continue;
+                if (d.night) continue;
+                const exc = [d.morningInside, d.morningManager, d.eveningInside, d.eveningManager].filter(Boolean);
+                const sorted = [...nightPool].sort((a,b) => countShiftsInWeek(a.name,i) - countShiftsInWeek(b.name,i));
+                const emp = sorted.find(e => !exc.includes(e.name) && canAssign(e, i, 'night'));
+                if (emp) {
+                    d.night = emp.name;
+                    if (i + 1 < currentSchedule.length && plan[emp.name]) {
+                        plan[emp.name][i + 1] = 'off';
+                    }
+                }
+            }
+
+            // ── ШАГ 6: SW (только если все обязательные слоты дня заполнены) ────
+            const swPool = shuffle(employees.level3 || []);
+            for (let i = s; i <= e; i++) {
+                const d = currentSchedule[i];
+                if (!d.isCurrentMonth || d.sw) continue;
+                if (!d.morningInside || !d.eveningInside || !d.morningManager || !d.eveningManager) continue;
+                const exc = [d.morningInside, d.morningManager, d.eveningInside, d.eveningManager].filter(Boolean);
+                const sorted = [...swPool].sort((a,b) => countShiftsInWeek(a.name,i) - countShiftsInWeek(b.name,i));
+                const emp = sorted.find(e => !exc.includes(e.name) && canAssign(e, i, 'sw'));
+                if (emp) d.sw = emp.name;
+            }
 
             try { enforceAfterNightRulesForRange(s, e); } catch (err) { console.error(err); }
             try { ensureRdmOnePerWeekFix(s, e); } catch (err) { console.error(err); }
-            try { autotestLog({ action: 'fillRemainingShiftsForWeek_end', weekStart: s, weekEnd: e }); } catch (e) {}
-            console.debug('fillRemainingShiftsForWeek end', s, e);
         }
 
         // --- вспомогательные функции для точного порядка назначений ---
@@ -8262,7 +9414,7 @@ function enforceRdmExactlyOnePerWeek() {
 
         function assignNightShiftsForWeekPrefer(s, e, preferredPredicate) {
             const pboNightShifts = document.getElementById('pboNightShifts')?.value === 'true';
-            if (!pboNightShifts) { for (let i = s; i <= e; i++) { if (currentSchedule[i]) { currentSchedule[i].night = null; currentSchedule[i].night2 = null; } } try { ensureDoubleNightLastDay(); } catch (e) {} return; }
+            if (!pboNightShifts) { for (let i = s; i <= e; i++) { if (currentSchedule[i]) { currentSchedule[i].night = ""; currentSchedule[i].night2 = ""; } } try { ensureDoubleNightLastDay(); } catch (e) {} return; }
             const weeklyNightCount = {}; getAllEmployees().forEach(emp => { weeklyNightCount[emp.name] = 0; });
             for (let i = s; i <= e; i++) { const d = currentSchedule[i]; if (!d) continue; if (d.night) weeklyNightCount[d.night] = (weeklyNightCount[d.night]||0)+1; if (d.night2) weeklyNightCount[d.night2] = (weeklyNightCount[d.night2]||0)+1; }
             for (let i = e; i >= s; i--) {
@@ -8296,7 +9448,22 @@ function enforceRdmExactlyOnePerWeek() {
         }
 
         function fillRemainingNightsWithHighLevels(s, e) {
-            for (let i = e; i >= s; i--) { const d = currentSchedule[i]; if (!d) continue; if (d.night) continue; const cand = getAllEmployees().find(emp => (emp.level==='level4' || emp.level==='level5') && emp.nightShifts && !isEmployeeOnRequest(emp.name, d.day, 'off') && countShiftsOnDayRecord(emp.name, d)===0 && countShiftsInWeek(emp.name, i) < 5); if (cand) setSlotIfNotProtected(d,'night',cand.name); }
+            // Приоритет: level3 → level4 → level5
+            const nightPriority = [
+                ...(employees.level3 || []).filter(e => e.nightShifts),
+                ...(employees.level4 || []).filter(e => e.nightShifts),
+                ...(employees.level5 || []).filter(e => e.nightShifts),
+            ];
+            for (let i = e; i >= s; i--) {
+                const d = currentSchedule[i];
+                if (!d || d.night) continue;
+                const cand = nightPriority.find(emp =>
+                    !isEmployeeOnRequest(emp.name, d.day, 'off') &&
+                    countShiftsOnDayRecord(emp.name, d) === 0 &&
+                    countShiftsInWeek(emp.name, i) < 5
+                );
+                if (cand) setSlotIfNotProtected(d, 'night', cand.name);
+            }
         }
 
         function enforceAfterNightRulesForRange(start, end) {
@@ -8313,7 +9480,7 @@ function enforceRdmExactlyOnePerWeek() {
                     const dd = currentSchedule[idx]; if (!dd) return;
                     ['morningManager','morningInside','eveningManager','eveningInside','night','night2','sw','rdm','office'].forEach(slot=>{
                         if (dd[slot]===name) {
-                            dd[slot] = null;
+                            dd[slot] = '';
                             try { autotestLog({ action: 'enforceAfterNight_removed', name, slot, idx, day: dd.day }); } catch(e){}
                         }
                     });
@@ -8403,85 +9570,43 @@ function enforceRdmExactlyOnePerWeek() {
             // apply per-week sequential generation
             try { autotestLog({ action: 'runWeeklyGeneration_start', year, month, totalDaysEstimate: Math.ceil((end - start)/(24*3600*1000)) }); } catch(e) {}
 
-            // отложим удаление office/rdm до финального этапа
             window._deferOfficeRdmRemoval = true;
 
-            // Сначала применим глобальную базовую расстановку, чтобы соблюсти фундаментальные правила
-            try { assignShifts(); } catch (err) { console.error('assignShifts (initial) error', err); }
-            try { autotestLog({ action: 'runWeeklyGeneration_after_assignShifts', missingMandatory: countMissingMandatorySlots(), totalDays: currentSchedule.length, totalEmps: getAllEmployees().length }); } catch(e) {}
+            // Планируем ротацию (2У+2В, выходные подряд, Сб+Вс раз в месяц, после ночи — выходной)
+            try { planMonthlyRotation(); } catch (err) { console.error('planMonthlyRotation error', err); }
+            // Перераспределяем нагрузку с тех у кого запрошен выходной
+            try { redistributeOffRequests(); } catch (err) { console.error('redistributeOffRequests error', err); }
 
-            const weekMaxPasses = (window.SchedulePerf && typeof window.SchedulePerf.weeklyPasses === 'number') ? window.SchedulePerf.weeklyPasses : 16;
-            const weekMaxAttempts = (window.SchedulePerf && typeof window.SchedulePerf.weeklyAttempts === 'number') ? window.SchedulePerf.weeklyAttempts : 50;
-            const weeklyMissingTarget = (window.SchedulePerf && typeof window.SchedulePerf.weeklyMissingTarget === 'number') ? window.SchedulePerf.weeklyMissingTarget : 2; // allow 1-2 missing per week by default
+            const _pboNight = document.getElementById('pboNightShifts')?.value === 'true';
+            const _lastCurIdx = (() => { let ii = -1; for (let i = 0; i < currentSchedule.length; i++) { if (currentSchedule[i].isCurrentMonth) ii = i; } return ii; })();
+            const _mandatoryKeys = (dayIdx) => ['morningInside','morningManager','eveningInside','eveningManager', ...(_pboNight || dayIdx === _lastCurIdx ? ['night'] : [])];
+            const _countMissing = (s, e) => { let m = 0; for (let i = s; i <= e; i++) { _mandatoryKeys(i).forEach(k => { if (!currentSchedule[i][k]) m++; }); } return m; };
+
             for (let s = 0; s < currentSchedule.length; s += 7) {
                 const e = Math.min(s + 6, currentSchedule.length - 1);
 
-                let attempt = 0;
-                let weekMissing = null;
-                let escalated = false;
-                let maxAttemptsLocal = weekMaxAttempts;
-                while (attempt < maxAttemptsLocal) {
-                    attempt++;
-                    try { autotestLog({ action: 'runWeeklyGeneration_week_attempt_start', weekStart: s, weekEnd: e, attempt }); } catch(e) {}
+                // Шаг 1: применяем заявки на выходные
+                try { assignRequestsForWeek(s, e); } catch (err) { console.error('assignRequestsForWeek error', err); }
 
-                    // Шаг 1: применяем локальные заявки для недели
-                    try { assignRequestsForWeek(s, e); } catch (err) { console.error('assignRequestsForWeek error', err); }
+                // Шаг 2: основное заполнение недели по новому алгоритму
+                try { fillRemainingShiftsForWeek(s, e); } catch (err) { console.error('fillRemainingShiftsForWeek error', err); }
 
-                    // Шаг 2: локальное заполнение слотов для недели (inside, night, rdm, office, sw)
-                    try { fillRemainingShiftsForWeek(s, e); } catch (err) { console.error('fillRemainingShiftsForWeek error', err); }
-
-                    // Шаг 3: итеративные попытки добить обязательные слоты только в этой неделе
-                    let passes = 0;
-                    while (passes < weekMaxPasses) {
-                        const beforeMissing = (() => { let m = 0; for (let i = s; i <= e; i++) { ['night','morningInside','morningManager','eveningInside','eveningManager'].forEach(k=>{ if (!currentSchedule[i][k]) m++; }); } return m; })();
-                        finalFillMandatorySlotsForWeek(s,e);
-                        tryTargetedReplacementsForWeek(s,e);
-                        removeDuplicatesInDayRange(s,e);
-                        passes++;
-                        const afterMissing = (() => { let m = 0; for (let i = s; i <= e; i++) { ['night','morningInside','morningManager','eveningInside','eveningManager'].forEach(k=>{ if (!currentSchedule[i][k]) m++; }); } return m; })();
-                        if (afterMissing === 0 || afterMissing >= beforeMissing) break;
-                    }
-
-                    // Фундаментальные проверки: ночные правила и запрет вечер->утро — применяем в пределах недели
-                    try { enforceNightShiftRulesForRange(s, e); } catch (err) { console.error('enforceNightShiftRulesForRange error', err); }
-                    try { correctEveningToMorningConflictsRange(s, e); } catch (err) { console.error('correctEveningToMorningConflictsRange error', err); }
-
-                    // Удаляем SW в днях, где нет менеджера (SW — самый низкоприоритетный)
-                    try { cleanupSwForWeek(s, e); } catch (err) { console.error('cleanupSwForWeek error', err); }
-
-                    // Наконец, локальная финализация RDM для недели
-                    try { finalizeRdmOnePerWeekRange(s,e); } catch(e) { console.error('finalizeRdmOnePerWeekRange error', e); }
-
-                    // подсчёт оставшихся обязательных незаполненных слотов
-                    weekMissing = (()=>{let m=0; for(let i=s;i<=e;i++){['night','morningInside','morningManager','eveningInside','eveningManager'].forEach(k=>{ if(!currentSchedule[i][k]) m++; });} return m; })();
-                    try { autotestLog({ action: 'runWeeklyGeneration_week_attempt_end', weekStart: s, weekEnd: e, attempt, weekMissing }); } catch(e) {}
-
-                    // если неделя достигла целевого количества незаполненных смен — переходим к следующей неделе
-                    if (weekMissing <= weeklyMissingTarget) {
-                        try { autotestLog({ action: 'runWeeklyGeneration_week_target_met', weekStart: s, weekEnd: e, attempt, weekMissing, weeklyMissingTarget }); } catch(e) {}
-                        break;
-                    }
-
-                    // если исчерпали попытки и ещё не эскалировали — увеличиваем до 999 и продолжаем
-                    if (attempt >= maxAttemptsLocal && !escalated) {
-                        escalated = true;
-                        maxAttemptsLocal = 999;
-                        try { autotestLog({ action: 'runWeeklyGeneration_escalate_attempts', weekStart: s, weekEnd: e, previousAttempts: attempt, newLimit: maxAttemptsLocal }); } catch(e) {}
-                        // продолжим цикл с новым лимитом
-                    }
+                // Шаг 3: добить оставшиеся незаполненные обязательные слоты (fallback)
+                let passes = 0;
+                while (passes < 8) {
+                    const before = _countMissing(s, e);
+                    if (before === 0) break;
+                    try { finalFillMandatorySlotsForWeek(s, e); } catch (err) { console.error(err); }
+                    try { removeDuplicatesInDayRange(s, e); } catch (err) { console.error(err); }
+                    passes++;
+                    if (_countMissing(s, e) >= before) break; // прогресса нет
                 }
 
-                // лог прогресса по неделе (финальный)
-                try { autotestLog({ action: 'runWeeklyGeneration_week_completed', weekStart: s, weekEnd: e, missingMandatory: weekMissing }); } catch(e) {}
-
-                // Если неделя всё ещё содержит незаполненные обязательные слоты сверх целевого порога, останавливаем генерацию
-                if (weekMissing > weeklyMissingTarget) {
-                    try { autotestLog({ action: 'runWeeklyGeneration_stop_incomplete_week', weekStart: s, weekEnd: e, missingMandatory: weekMissing, weeklyMissingTarget }); } catch(e) {}
-                    window._deferOfficeRdmRemoval = false;
-                    try { renderSchedule(); saveData(); } catch(e) {}
-                    showMessage(`Остановка генерации: неделя ${s}-${e} содержит незаполненные обязательные смены (${weekMissing})`, true);
-                    return; // не переходим к следующей неделе
-                }
+                // Шаг 4: финальные проверки корректности
+                try { enforceNightShiftRulesForRange(s, e); } catch (err) { console.error(err); }
+                try { correctEveningToMorningConflictsRange(s, e); } catch (err) { console.error(err); }
+                try { cleanupSwForWeek(s, e); } catch (err) { console.error(err); }
+                try { finalizeRdmOnePerWeekRange(s, e); } catch (err) { console.error(err); }
             }
 
             // Снимаем отложенный режим — можно применять радикальные удаления (office/rdm)
@@ -8512,6 +9637,7 @@ function enforceRdmExactlyOnePerWeek() {
 
             document.getElementById('employeesBtn')?.addEventListener('click', showEmployees);
             document.getElementById('clearBtn')?.addEventListener('click', clearSchedule);
+            document.getElementById('exportCsvBtn')?.addEventListener('click', exportCsv);
             document.getElementById('addEmployeeBtn')?.addEventListener('click', addEmployee);
             document.getElementById('clearDataBtn')?.addEventListener('click', () => {
                 showConfirmModal('Сбросить данные?', async confirmed => { if (confirmed) { try { await fetch('/api/reset', { method: 'POST' }); } catch(e){} location.reload(); } });
@@ -8519,6 +9645,7 @@ function enforceRdmExactlyOnePerWeek() {
             // При смене года/месяца не генерируем автоматически — очищаем текущее расписание
             const clearScheduleOnDateChange = () => {
                 currentSchedule = [];
+                /* schedule cleared */
                 document.getElementById('scheduleContainer').innerHTML = '<p class="placeholder-text">Выбран другой месяц. Нажмите "Генерировать" для создания расписания</p>';
                 // Сбросим прогресс/сообщения
                 try { document.getElementById('successMessage').style.display = 'none'; } catch (e) {}
@@ -9498,9 +10625,9 @@ function enforceRdmExactlyOnePerWeek() {
                         // Показать заглушку на время балансировки и финализации
                         try { showGenerationOverlay('Балансировка и финализация расписания — подождите...'); } catch (e) {}
                         // Первый проход — более консервативный прогон, чтобы не концентрировать приросты
-                        await balanceShifts({ iterations: 200000, perPersonLimit: 1, maxTotalDelta: 2, maxGainPerEmployee: 1, baseCounts: before, maxGainAcross: 1 });
+                        await balanceShifts({ iterations: 3000, perPersonLimit: 1, maxTotalDelta: 2, maxGainPerEmployee: 1, baseCounts: before, maxGainAcross: 1 });
                         // Второй проход — дополнительный мягкий прогон для донастройки
-                        await balanceShifts({ iterations: 50000, perPersonLimit: 1, maxTotalDelta: 2, maxGainPerEmployee: 1, baseCounts: before, maxGainAcross: 1 });
+                        await balanceShifts({ iterations: 1000, perPersonLimit: 1, maxTotalDelta: 2, maxGainPerEmployee: 1, baseCounts: before, maxGainAcross: 1 });
 
                         // Гарантируем минимум 2 утра и 2 вечера для всех менеджеров и попытки выравнивания
                         try {
@@ -9668,6 +10795,96 @@ function enforceRdmExactlyOnePerWeek() {
                 }
             }
         });
+    </script>
+
+    <!-- Inline shift popover (replaces shiftModal for non-night shifts) -->
+    <div id="shiftPopover"></div>
+    <script>
+    (function() {
+        const pop = document.getElementById('shiftPopover');
+        let _popDay = null, _popKey = null;
+
+        function closePopover() {
+            pop.style.display = 'none';
+            _popDay = null; _popKey = null;
+        }
+
+        document.addEventListener('mousedown', function(e) {
+            if (!pop.contains(e.target) && !e.target.closest('.shift-box')) closePopover();
+        });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePopover(); });
+
+        window.editShift = function(ev, day, key) {
+            const d = currentSchedule.find(x => x.day === day);
+            if (!d) return;
+            const dayIndex = currentSchedule.indexOf(d);
+            const isNight = (key === 'night');
+            const emps = ['–', ...getAllEmployees().map(e => e.name)];
+
+            const shiftN = { night: 'Ночь', morningInside: 'Утро (Инсайд)', morningManager: 'Утро (Менеджер)', eveningInside: 'Вечер (Инсайд)', eveningManager: 'Вечер (Менеджер)', rdm: 'RDM', office: 'Офис', sw: 'SW' };
+
+            const makeOpts = (cur) => emps.map(n => {
+                let label = n;
+                if (n !== '–') {
+                    const cnt = countShiftsInWeek(n, dayIndex);
+                    label = `${n} (${cnt}/5)`;
+                }
+                return `<option value="${n}" ${(cur === n || (!cur && n === '–')) ? 'selected' : ''}>${label}</option>`;
+            }).join('');
+
+            // Предупреждения о выходных
+            const warns = getAllEmployees()
+                .filter(e => isEmployeeOnRequest(e.name, day, 'off'))
+                .map(e => `<div class="pop-warn">⚠ ${e.name} — выходной</div>`).join('');
+
+            _popDay = day; _popKey = key;
+
+            if (isNight) {
+                pop.innerHTML = `
+                    <div class="pop-label">${shiftN[key]}</div>
+                    ${warns}
+                    <select id="popSel1">${makeOpts(d[key])}</select>
+                    <select id="popSel2">${makeOpts(d.night2)}</select>
+                    <div class="pop-save">
+                        <button class="pop-ok" onclick="window._popSaveNight()">Сохранить</button>
+                        <button class="pop-cancel" onclick="document.getElementById('shiftPopover').style.display='none'">✕</button>
+                    </div>`;
+                window._popSaveNight = function() {
+                    const dd = currentSchedule.find(x => x.day === _popDay); if (!dd) return;
+                    const v1 = document.getElementById('popSel1').value;
+                    const v2 = document.getElementById('popSel2').value;
+                    dd.night = v1 === '–' ? '' : v1;
+                    dd.night2 = v2 === '–' ? '' : v2;
+                    closePopover(); renderSchedule(); saveData(); showMessage('Смена обновлена!');
+                };
+            } else {
+                pop.innerHTML = `
+                    <div class="pop-label">${shiftN[key]}</div>
+                    ${warns}
+                    <select id="popSel1">${makeOpts(d[key])}</select>`;
+                // Авто-сохранение при выборе
+                pop.querySelector('#popSel1').addEventListener('change', function() {
+                    const dd = currentSchedule.find(x => x.day === _popDay); if (!dd) return;
+                    dd[_popKey] = this.value === '–' ? '' : this.value;
+                    closePopover(); renderSchedule(); saveData(); showMessage('Смена обновлена!');
+                });
+            }
+
+            // Позиционируем popover рядом с кликнутой ячейкой
+            const box = (ev && (ev.currentTarget || ev.target)) || document.body;
+            const rect = box.getBoundingClientRect();
+            pop.style.display = 'block';
+            const pw = pop.offsetWidth;
+            let left = rect.left + window.scrollX;
+            let top = rect.bottom + window.scrollY + 4;
+            if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+            pop.style.left = left + 'px';
+            pop.style.top = top + 'px';
+
+            // Фокус на select
+            setTimeout(() => { const s = pop.querySelector('select'); if (s) s.focus(); }, 50);
+        };
+    })();
     </script>
 </body>
 </html>
