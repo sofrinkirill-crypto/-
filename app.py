@@ -279,6 +279,9 @@ class Scheduler:
 
         # П.14: накопительный счёт смен за январские праздники 1-8 янв
         self._jan_holiday_shifts = {emp['name']: 0 for emp in self.employees}
+        # Директор: месячный лимит inside-смен (офис приоритет)
+        self._dir_inside_month = 0
+        self.DIR_INSIDE_MONTH_MAX = 4
 
         for week_idx, week in enumerate(weeks):
             self._current_week_idx = week_idx
@@ -479,7 +482,9 @@ class Scheduler:
         level5_emps = [e for e in self.by_level.get('level5', []) if e.get('canInside')]
         level4_emps = [e for e in self.by_level.get('level4', []) if e.get('canInside')]
 
-        inside_emps = level6_emps + level5_emps + level4_emps
+        # Директор в пуле, но с низким приоритетом — после level5/level4.
+        # Мягкий лимит inside-смен директора: 1 в неделю (остальное — офис).
+        inside_emps = level5_emps + level4_emps + level6_emps
         if not inside_emps:
             return
 
@@ -536,24 +541,31 @@ class Scheduler:
             workers = [e for e in inside_emps if d in work_map.get(e['name'], [])]
 
             if not s['morningInside']:
-                non_director = [e for e in workers if e.get('level') != 'level6']
-                pool = non_director if non_director else workers
-                emp = pick_inside(pool, d, m_count, 2, is_morning=True)
+                # Директор — только если ещё не исчерпан месячный лимит inside
+                non_dir = [e for e in workers if e.get('level') != 'level6']
+                emp = pick_inside(non_dir, d, m_count, 2, is_morning=True)
+                if not emp and self._dir_inside_month < self.DIR_INSIDE_MONTH_MAX:
+                    emp = pick_inside([e for e in workers if e.get('level') == 'level6'],
+                                      d, m_count, 1, is_morning=True)
                 if emp:
                     s['morningInside'] = emp['name']
                     m_count[emp['name']] += 1; total[emp['name']] += 1
+                    if any(e['name'] == s['morningInside'] and e.get('level') == 'level6'
+                           for e in workers):
+                        self._dir_inside_month += 1
 
             if not s['eveningInside']:
-                director_avail = [e for e in workers if e.get('level') == 'level6']
-                if director_avail:
-                    emp = pick_inside(director_avail, d, e_count, 2, is_morning=False)
-                    if not emp:
-                        emp = pick_inside(workers, d, e_count, 2, is_morning=False)
-                else:
-                    emp = pick_inside(workers, d, e_count, 2, is_morning=False)
+                non_dir = [e for e in workers if e.get('level') != 'level6']
+                emp = pick_inside(non_dir, d, e_count, 2, is_morning=False)
+                if not emp and self._dir_inside_month < self.DIR_INSIDE_MONTH_MAX:
+                    emp = pick_inside([e for e in workers if e.get('level') == 'level6'],
+                                      d, e_count, 1, is_morning=False)
                 if emp:
                     s['eveningInside'] = emp['name']
                     e_count[emp['name']] += 1; total[emp['name']] += 1
+                    if any(e['name'] == s['eveningInside'] and e.get('level') == 'level6'
+                           for e in workers):
+                        self._dir_inside_month += 1
 
         # Pass 2: RDM — только в НЕ праздничные дни для level4-5 (П.14)
         for emp in sorted(inside_emps, key=lambda e: total[e['name']]):
@@ -577,52 +589,99 @@ class Scheduler:
                 if d not in work_map.get(emp['name'], []) or on_day(emp['name'], d): continue
                 s = schedule[d]
                 holiday = is_holiday(d)
+                is_dir = emp.get('level') == 'level6'
                 if not s['morningInside'] and m_count[emp['name']] < 3 and not had_evening_prev(emp['name'], d):
-                    s['morningInside'] = emp['name']
-                    m_count[emp['name']] += 1; total[emp['name']] += 1
+                    if not is_dir or self._dir_inside_month < self.DIR_INSIDE_MONTH_MAX:
+                        s['morningInside'] = emp['name']
+                        m_count[emp['name']] += 1; total[emp['name']] += 1
+                        if is_dir: self._dir_inside_month += 1
                 elif not s['eveningInside'] and e_count[emp['name']] < 3:
-                    s['eveningInside'] = emp['name']
-                    e_count[emp['name']] += 1; total[emp['name']] += 1
+                    if not is_dir or self._dir_inside_month < self.DIR_INSIDE_MONTH_MAX:
+                        s['eveningInside'] = emp['name']
+                        e_count[emp['name']] += 1; total[emp['name']] += 1
+                        if is_dir: self._dir_inside_month += 1
                 elif not holiday and emp.get('level') != 'level6' and not s['rdm'] and r_count[emp['name']] < 1:
                     s['rdm'] = emp['name']
                     r_count[emp['name']] += 1; total[emp['name']] += 1
 
         # Pass 4: emergency — обязательные слоты без cap
+        # Директор попадает ТОЛЬКО если нет ни одного level5/level4.
+        # Лимит inside для директора: 2 в неделю (он в основном на офисе).
+        all_inside_emps = level5_emps + level4_emps + level6_emps
         for d in sorted_days:
             s = schedule[d]
-            workers_week = [e for e in inside_emps if d in work_map.get(e['name'], [])]
-            workers_any  = [e for e in inside_emps if not on_day(e['name'], d)]
+            non_dir = level5_emps + level4_emps
+            workers_week = [e for e in all_inside_emps if d in work_map.get(e['name'], [])]
+            workers_any  = [e for e in all_inside_emps if not on_day(e['name'], d)]
+            non_dir_week = [e for e in non_dir if d in work_map.get(e['name'], [])]
+            non_dir_any  = [e for e in non_dir if not on_day(e['name'], d)]
 
             if not s['morningInside']:
-                cands = [e for e in workers_week if not on_day(e['name'], d)
+                cands = [e for e in non_dir_week if not on_day(e['name'], d)
                          and not had_evening_prev(e['name'], d)]
-                if not cands: cands = [e for e in workers_week if not on_day(e['name'], d)]
-                if not cands: cands = [e for e in workers_any if not had_evening_prev(e['name'], d)]
-                if not cands: cands = workers_any
+                if not cands: cands = [e for e in non_dir_week if not on_day(e['name'], d)]
+                if not cands: cands = [e for e in non_dir_any if not had_evening_prev(e['name'], d)]
+                if not cands: cands = non_dir_any
+                # Директор — только если level5/4 совсем нет и лимит не исчерпан
+                if not cands and self._dir_inside_month < self.DIR_INSIDE_MONTH_MAX:
+                    dir_cands = [e for e in workers_week if not on_day(e['name'], d)
+                                 and e.get('level') == 'level6']
+                    if not dir_cands:
+                        dir_cands = [e for e in workers_any if e.get('level') == 'level6']
+                    cands = dir_cands
                 if cands:
                     cands.sort(key=lambda e: (m_count.get(e['name'],0), total.get(e['name'],0)))
                     emp = cands[0]
                     s['morningInside'] = emp['name']
                     m_count[emp['name']] = m_count.get(emp['name'],0) + 1
                     total[emp['name']]   = total.get(emp['name'],0)   + 1
+                    if emp.get('level') == 'level6':
+                        self._dir_inside_month += 1
 
             if not s['eveningInside']:
-                cands = [e for e in workers_week if not on_day(e['name'], d)]
-                if not cands: cands = workers_any
+                cands = [e for e in non_dir_week if not on_day(e['name'], d)]
+                if not cands: cands = non_dir_any
+                if not cands and self._dir_inside_month < self.DIR_INSIDE_MONTH_MAX:
+                    dir_cands = [e for e in workers_week if not on_day(e['name'], d)
+                                 and e.get('level') == 'level6']
+                    if not dir_cands:
+                        dir_cands = [e for e in workers_any if e.get('level') == 'level6']
+                    cands = dir_cands
                 if cands:
                     cands.sort(key=lambda e: (e_count.get(e['name'],0), total.get(e['name'],0)))
                     emp = cands[0]
                     s['eveningInside'] = emp['name']
                     e_count[emp['name']] = e_count.get(emp['name'],0) + 1
                     total[emp['name']]   = total.get(emp['name'],0)   + 1
+                    if emp.get('level') == 'level6':
+                        self._dir_inside_month += 1
 
     def _assign_director_office(self, emp, work_days, schedule):
-        """После inside-смен — office для директора (административная работа)."""
+        """
+        Директор работает ПРЕИМУЩЕСТВЕННО в офисе (административная работа, Work Flow).
+        Inside-смены — только когда назначены алгоритмом (emergency). 
+        Недельный лимит: 4 смены (норма ~19/мес при 5 неделях).
+        """
+        DIR_WEEK_TARGET = 4  # офисных смен в неделю
+        # Группируем work_days по неделям
+        from datetime import date
+        week_counts = {}  # week_start -> count уже назначенных смен директора
         for d in work_days:
-            already_on = any(schedule[d].get(s) == emp['name']
-                             for s in ('morningInside', 'eveningInside', 'rdm'))
-            if not already_on and not schedule[d]['office']:
+            ws = d - timedelta(days=d.weekday())
+            already = sum(1 for s in SLOTS if schedule[d].get(s) == emp['name'])
+            week_counts[ws] = week_counts.get(ws, 0) + already
+
+        for d in sorted(work_days):
+            ws = d - timedelta(days=d.weekday())
+            already_on = any(schedule[d].get(s) == emp['name'] for s in SLOTS)
+            if already_on:
+                continue  # уже на смене в этот день (inside/rdm)
+            # Проверяем недельный лимит
+            if week_counts.get(ws, 0) >= DIR_WEEK_TARGET:
+                continue
+            if not schedule[d]['office']:
                 schedule[d]['office'] = emp['name']
+                week_counts[ws] = week_counts.get(ws, 0) + 1
 
     def _assign_managers(self, week, schedule, work_map, week_idx, month, plan):
         """
