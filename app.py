@@ -542,7 +542,9 @@ class Scheduler:
         def pick_inside(candidates, d, count_dict, soft_cap, is_morning):
             def ok(e):
                 if on_day(e['name'], d): return False
-                if total[e['name']] >= TARGET: return False
+                # level5 резервируют 1 слот под RDM — максимум TARGET-1 inside смен
+                rdm_reserve = 1 if e.get('level') in ('level4','level5') else 0
+                if total[e['name']] >= TARGET - rdm_reserve: return False
                 if is_morning and had_evening_prev(e['name'], d): return False
                 return True
 
@@ -618,12 +620,14 @@ class Scheduler:
                 s = schedule[d]
                 holiday = is_holiday(d)
                 is_dir = emp.get('level') == 'level6'
-                if not s['morningInside'] and m_count[emp['name']] < 3 and not had_evening_prev(emp['name'], d):
+                rdm_reserve = 1 if emp.get('level') in ('level4','level5') else 0
+                inside_cap = TARGET - rdm_reserve
+                if not s['morningInside'] and m_count[emp['name']] < 3 and not had_evening_prev(emp['name'], d) and total[emp['name']] < inside_cap:
                     if not is_dir or self._dir_inside_month < self.DIR_INSIDE_MONTH_MAX:
                         s['morningInside'] = emp['name']
                         m_count[emp['name']] += 1; total[emp['name']] += 1
                         if is_dir: self._dir_inside_month += 1
-                elif not s['eveningInside'] and e_count[emp['name']] < 3:
+                elif not s['eveningInside'] and e_count[emp['name']] < 3 and total[emp['name']] < inside_cap:
                     if not is_dir or self._dir_inside_month < self.DIR_INSIDE_MONTH_MAX:
                         s['eveningInside'] = emp['name']
                         e_count[emp['name']] += 1; total[emp['name']] += 1
