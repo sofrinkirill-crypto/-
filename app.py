@@ -80,6 +80,26 @@ def save_data(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
+# ─── Default employees (seed when DB is empty) ───────────────────────────────
+DEFAULT_EMPLOYEES = [
+    {'name': 'Кирилл',   'level': 'level5', 'canInside': True},
+    {'name': 'Олег',     'level': 'level5', 'canInside': True},
+    {'name': 'Вова',     'level': 'level5', 'canInside': True},
+    {'name': 'Ангелина', 'level': 'level3', 'canInside': False},
+    {'name': 'Антон',    'level': 'level3', 'canInside': False},
+    {'name': 'Андрей',   'level': 'level3', 'canInside': False},
+    {'name': 'Маша',     'level': 'level3', 'canInside': False},
+    {'name': 'Ариана',   'level': 'level3', 'canInside': False},
+    {'name': 'Лиза',     'level': 'level6', 'canInside': False},
+]
+
+def seed_if_empty():
+    data = load_data()
+    if not data['employees']:
+        data['employees'] = [{'id': str(uuid.uuid4()), **e} for e in DEFAULT_EMPLOYEES]
+        save_data(data)
+        print('Seeded default employees')
+
 # ─── Routes ─────────────────────────────────────────────────────────────────
 
 @app.route('/')
@@ -599,6 +619,12 @@ class Scheduler:
                 schedule[d]['sw'] = emp['name']
                 sw_this_week[emp['name']] += 1
 
+
+# Auto-seed on startup (runs when gunicorn imports this module)
+try:
+    seed_if_empty()
+except Exception as _e:
+    print('Seed error:', _e)
 
 if __name__ == '__main__':
     import os
