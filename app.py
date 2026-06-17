@@ -277,20 +277,6 @@ class Scheduler:
                     morning_weeks.add(wi)
             self._week_start_morning[emp['name']] = morning_weeks
 
-        # П.4: одна неделя в месяц = 4 смены (доп. выходной)
-        # Выбираем неделю с доп. выходным для каждого сотрудника
-        month_week_count = len([w for w in weeks if any(d.month == month for d in w)])
-        self._extra_off_week = {}
-        for i, emp in enumerate(salary_emps):
-            emp_hash = sum(ord(c) for c in emp['name'])
-            if month_week_count >= 2:
-                # Избегаем первую и последнюю неделю (могут быть неполными)
-                candidates = list(range(1, month_week_count - 1)) if month_week_count > 2 else [0]
-                chosen = candidates[(emp_hash + self._gen_nonce) % len(candidates)]
-                self._extra_off_week[emp['name']] = chosen
-            else:
-                self._extra_off_week[emp['name']] = -1  # не применять
-
         # П.14: накопительный счёт смен за январские праздники 1-8 янв
         self._jan_holiday_shifts = {emp['name']: 0 for emp in self.employees}
 
@@ -388,12 +374,9 @@ class Scheduler:
         month_days = [d for d in week if d.month == month]
         max_off = max(0, len(month_days) - 1)
 
-        # П.4: в «доп. выходную» неделю — 3 выходных вместо 2 (4 смены вместо 5)
-        is_extra_off_week = (week_idx == self._extra_off_week.get(emp['name'], -1))
-        target_off = min(3 if is_extra_off_week else 2, max_off)
-        # Только если это полная неделя (7 дней текущего месяца) — иначе 2
-        if len(month_days) < 5:
-            target_off = min(2, max_off)
+        # Всегда 2 выходных в неделю. Доп. выходной (отгул) берётся только
+        # из явных запросов сотрудника (vacation/off в self.requests).
+        target_off = min(2, max_off)
 
         forced_in_month = forced & set(month_days)
         if len(forced_in_month) >= target_off:
