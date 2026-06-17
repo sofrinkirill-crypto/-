@@ -321,6 +321,10 @@ class Scheduler:
         self._assign_managers(week, schedule, work_map, week_idx, month, plan)
         self._assign_managers_emergency(week, schedule, work_map, month)
         self._assign_nights(week, schedule, work_map, prev_nights, month)
+        # П.10: work_map считался ДО назначения ночных → чистим конфликты вручную
+        self._enforce_night_rest(week, schedule, month)
+        # Заново заполняем слоты, опустевшие после очистки
+        self._assign_managers_emergency(week, schedule, work_map, month)
         self._assign_sw(week, schedule, work_map, month)
 
         for emp in self.by_level.get('level6', []):
@@ -706,7 +710,8 @@ class Scheduler:
 
             if not schedule[d]['morningManager']:
                 cands = [m for m in managers
-                         if not any(schedule[d].get(s) == m['name'] for s in SLOTS)]
+                         if not any(schedule[d].get(s) == m['name'] for s in SLOTS)
+                         and not self._had_night_before(m['name'], d, schedule, 1)]
                 cands_ok = [m for m in cands
                             if not (prev_d in schedule and
                                     any(schedule[prev_d].get(s) == m['name'] for s in EVENING_SLOTS))]
@@ -720,7 +725,8 @@ class Scheduler:
 
             if not schedule[d]['eveningManager']:
                 cands = [m for m in managers
-                         if not any(schedule[d].get(s) == m['name'] for s in SLOTS)]
+                         if not any(schedule[d].get(s) == m['name'] for s in SLOTS)
+                         and not self._had_night_before(m['name'], d, schedule, 1)]
                 if cands:
                     cands.sort(key=lambda m: sum(
                         1 for dd in week for sl in ('morningManager','eveningManager','sw','night','night2')
@@ -764,6 +770,44 @@ class Scheduler:
                     schedule[d][slot] = emp['name']
                     prev_nights[emp['name']].add(d.strftime('%Y-%m-%d'))
 
+
+    def _had_night_before(self, name, d, schedule, days=1):
+        """Проверяет, работал ли сотрудник в ночную за последние `days` дней."""
+        for i in range(1, days + 1):
+            prev = d - timedelta(days=i)
+            if prev in schedule:
+                for slot in ('night', 'night2'):
+                    if schedule[prev].get(slot) == name:
+                        return True
+        return False
+
+    def _enforce_night_rest(self, week, schedule, month):
+        """
+        П.10 (обязательно): после ночной смены следующий день = выходной.
+        П.9  (рекомендация): второй выходной после ночи — убираем только
+              НЕобязательные слоты (sw/rdm/office), mandatory не трогаем.
+        """
+        mandatory = set(self.MANDATORY)
+        for d in week:
+            if d.month != month:
+                continue
+            for slot in ('night', 'night2'):
+                name = schedule[d].get(slot)
+                if not name:
+                    continue
+                # П.10: следующий день — полный выходной (убираем все слоты)
+                next_d = d + timedelta(days=1)
+                if next_d in schedule:
+                    for s in SLOTS:
+                        if schedule[next_d].get(s) == name:
+                            schedule[next_d][s] = ''
+                # П.9: второй день — только НЕобязательные слоты
+                next2_d = d + timedelta(days=2)
+                if next2_d in schedule and next2_d.month == month:
+                    for s in SLOTS:
+                        if s not in mandatory and schedule[next2_d].get(s) == name:
+                            schedule[next2_d][s] = ''
+
     def _assign_sw(self, week, schedule, work_map, month):
         """SW — только level3, только когда обязательные слоты закрыты, не в праздники."""
         sw_pool = self.by_level.get('level3', [])
@@ -788,6 +832,7 @@ class Scheduler:
                 and d in work_map.get(e['name'], [])
                 and sw_week[e['name']] < 1
                 and shifts_this_week(e['name']) < 5
+                and not self._had_night_before(e['name'], d, schedule, 2)
             ]
             if cands:
                 cands.sort(key=lambda e: sw_week[e['name']])
