@@ -137,6 +137,35 @@ def delete_employee(emp_id):
     save_data(data)
     return jsonify({'ok': True})
 
+@app.route('/api/employees/bulk', methods=['PUT'])
+def bulk_employees():
+    """Replace entire employee list (used by original HTML frontend)."""
+    data = load_data()
+    emps = request.json or []
+    # Assign IDs if missing
+    for e in emps:
+        if not e.get('id'):
+            e['id'] = str(uuid.uuid4())
+    data['employees'] = emps
+    save_data(data)
+    return jsonify({'ok': True, 'count': len(emps)})
+
+@app.route('/api/requests/bulk', methods=['PUT'])
+def bulk_requests():
+    """Replace entire requests dict (used by original HTML frontend)."""
+    data = load_data()
+    data['requests'] = request.json or {}
+    save_data(data)
+    return jsonify({'ok': True})
+
+@app.route('/api/reset', methods=['POST'])
+def reset_data():
+    """Clear all data and re-seed defaults."""
+    data = {'employees': [], 'requests': {}, 'schedules': {}}
+    save_data(data)
+    seed_if_empty()
+    return jsonify({'ok': True})
+
 # Requests
 @app.route('/api/requests', methods=['GET'])
 def get_requests():
