@@ -202,8 +202,9 @@ def update_slot():
 def generate():
     data = load_data(); body = request.json
     year, month = body['year'], body['month']
+    use_nights = body.get('nights', True)
     scheduler = Scheduler(data['employees'], data['requests'])
-    schedule = scheduler.generate(year, month)
+    schedule = scheduler.generate(year, month, use_nights=use_nights)
     key = f'{year}-{month}'
     data['schedules'][key] = {d.strftime('%Y-%m-%d'): slots for d, slots in schedule.items()}
     save_data(data); return jsonify(data['schedules'][key])
@@ -227,7 +228,8 @@ class Scheduler:
 
     # ── Top-level generate ────────────────────────────────────────────────────
 
-    def generate(self, year, month):
+    def generate(self, year, month, use_nights=True):
+        self.use_nights = use_nights
         first = date(year, month, 1)
         last  = date(year, month, cal.monthrange(year, month)[1])
         start = first - timedelta(days=first.weekday())
@@ -304,7 +306,8 @@ class Scheduler:
                          for emp in self.employees}
 
         # ШАГ 2: назначаем ночные ПЕРВЫМИ — теперь знаем кто когда работает ночь
-        self._assign_nights(week, schedule, base_work_map, prev_nights, month, week_idx)
+        if self.use_nights:
+            self._assign_nights(week, schedule, base_work_map, prev_nights, month, week_idx)
 
         # ШАГ 3: выходные с учётом П.10 (ночь N → день N+1 = 1 из 2 выходных)
         work_map = {}

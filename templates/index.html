@@ -9677,7 +9677,7 @@ ${weeksHtml}
                 const resp = await fetch('/api/generate', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({year, month})
+                    body: JSON.stringify({year, month, nights: document.getElementById('pboNightShifts')?.value === 'true'})
                 });
                 if (!resp.ok) throw new Error(await resp.text());
                 apiSchedule = await resp.json();
