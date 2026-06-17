@@ -847,7 +847,7 @@ class Scheduler:
                     e for e in night_pool
                     if e['name'] not in occupied
                     and d in work_map.get(e['name'], [])
-                    and nights_this_week(e['name']) < 1      # П.3: max 1 ночь в неделю
+                    and nights_this_week(e["name"]) < 2      # П.3: max 2 ночи в неделю
                     and nights_this_month(e['name']) < 2     # П.3: max 2 ночи в месяц
                     and shifts_this_week(e['name']) < 5
                     # П.6: не ставим ночь в неделю Сб+Вс выходного (иначе 3 выходных)
