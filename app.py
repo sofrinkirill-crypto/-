@@ -662,7 +662,7 @@ class Scheduler:
         Inside-смены — только когда назначены алгоритмом (emergency). 
         Недельный лимит: 4 смены (норма ~19/мес при 5 неделях).
         """
-        DIR_WEEK_TARGET = 4  # офисных смен в неделю
+        DIR_WEEK_TARGET = 5  # офисных смен в неделю
         # Группируем work_days по неделям
         from datetime import date
         week_counts = {}  # week_start -> count уже назначенных смен директора
