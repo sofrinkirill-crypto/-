@@ -763,14 +763,14 @@
                 // Добавьте сотрудников уровня 4 здесь
             ],
             level3: [
-                { name: 'Ангелина', canInside: true, level: 'level3' },
-                { name: 'Антон', canInside: true, level: 'level3' },
-                { name: 'Андрей', canInside: true, level: 'level3' },
-                { name: 'Маша', canInside: true, level: 'level3' },
-                { name: 'Ариана', canInside: true, level: 'level3' }
+                { name: 'Ангелина', canInside: false, level: 'level3' },
+                { name: 'Антон', canInside: false, level: 'level3' },
+                { name: 'Андрей', canInside: false, level: 'level3' },
+                { name: 'Маша', canInside: false, level: 'level3' },
+                { name: 'Ариана', canInside: false, level: 'level3' }
             ],
             level6: [
-                { name: 'Лиза', canInside: false, level: 'level6' }
+                { name: 'Лиза', canInside: true, level: 'level6' }
             ]
         };
 
@@ -9280,21 +9280,63 @@ ${weeksHtml}
                 }
             });
 
-            // ── ШАГ 3: Level6 — office до 5 смен ────────────────────────────────
+            // ── ШАГ 3: Level6 (директор) — лидер смены открытия/закрытия ─────
+            // П.2 политики: "менеджеры на окладе, включая директора, управляли сменами открытия и закрытия"
+            // П.9 политики директора: вечерняя смена закрытия — приоритет
             (employees.level6||[]).forEach(emp => {
+                if (!emp.canInside) {
+                    // Если canInside=false — старое поведение: только office
+                    for (let i = s; i <= e; i++) {
+                        if (countShiftsInWeek(emp.name, i) >= 5) break;
+                        if (canAssign(emp, i, 'office')) currentSchedule[i].office = emp.name;
+                    }
+                    return;
+                }
+
+                // Приоритет 1: eveningInside (смена закрытия, п.9 директора)
+                let eDone = 0;
+                const eveningDays = [];
                 for (let i = s; i <= e; i++) {
-                    if (countShiftsInWeek(emp.name, i) >= 5) break;
-                    if (canAssign(emp, i, 'office')) {
-                        currentSchedule[i].office = emp.name;
+                    const t = getType(emp.name, i);
+                    if (t === 'evening' && currentSchedule[i]?.isCurrentMonth) eveningDays.push(i);
+                }
+                for (const i of eveningDays) {
+                    if (eDone >= 2) break;
+                    if (canAssign(emp, i, 'eveningInside')) { currentSchedule[i].eveningInside = emp.name; eDone++; }
+                }
+                // Фолбэк — любые свободные дни
+                if (eDone < 2) {
+                    for (let i = s; i <= e && eDone < 2; i++) {
+                        if (!currentSchedule[i]?.isCurrentMonth) continue;
+                        if (eveningDays.includes(i)) continue;
+                        if (canAssign(emp, i, 'eveningInside')) { currentSchedule[i].eveningInside = emp.name; eDone++; }
                     }
                 }
-                // Level6 с canInside — добавить до 1 inside-смены если нужно до 5
-                if (emp.canInside && countShiftsInWeek(emp.name, s) < 5) {
-                    for (let i = s; i <= e; i++) {
-                        if (countWSlots(emp.name, ['morningInside','eveningInside']) >= 1) break;
-                        if (canAssign(emp, i, 'morningInside')) { currentSchedule[i].morningInside = emp.name; break; }
-                        if (canAssign(emp, i, 'eveningInside')) { currentSchedule[i].eveningInside = emp.name; break; }
+
+                // Приоритет 2: morningInside (смена открытия)
+                let mDone = 0;
+                const morningDays = [];
+                for (let i = s; i <= e; i++) {
+                    const t = getType(emp.name, i);
+                    if (t === 'morning' && currentSchedule[i]?.isCurrentMonth) morningDays.push(i);
+                }
+                for (const i of morningDays) {
+                    if (mDone >= 2) break;
+                    if (canAssign(emp, i, 'morningInside')) { currentSchedule[i].morningInside = emp.name; mDone++; }
+                }
+                if (mDone < 2) {
+                    for (let i = s; i <= e && mDone < 2; i++) {
+                        if (!currentSchedule[i]?.isCurrentMonth) continue;
+                        if (morningDays.includes(i)) continue;
+                        if (canAssign(emp, i, 'morningInside')) { currentSchedule[i].morningInside = emp.name; mDone++; }
                     }
+                }
+
+                // Приоритет 3: office — оставшиеся рабочие дни (административная работа)
+                for (let i = s; i <= e; i++) {
+                    if (countShiftsInWeek(emp.name, i) >= 5) break;
+                    if (!currentSchedule[i]?.isCurrentMonth) continue;
+                    if (canAssign(emp, i, 'office')) currentSchedule[i].office = emp.name;
                 }
             });
 
@@ -9334,10 +9376,11 @@ ${weeksHtml}
             }
 
             // ── ШАГ 5: Ночи ──────────────────────────────────────────────────────
+            // Политика: ночными управляет менеджер уровня не ниже 3-го (level3+)
+            // Убран фильтр e.nightShifts — этого флага нет ни у кого
             const nightPool = shuffle([
-                ...(employees.level3||[]).filter(e => e.nightShifts),
-                ...(employees.level4||[]).filter(e => e.nightShifts),
-                ...(employees.level5||[]).filter(e => e.nightShifts),
+                ...(employees.level3||[]),
+                ...(employees.level2||[]),
             ]);
             for (let i = s; i <= e; i++) {
                 const d = currentSchedule[i];
@@ -9365,6 +9408,62 @@ ${weeksHtml}
                 const sorted = [...swPool].sort((a,b) => countShiftsInWeek(a.name,i) - countShiftsInWeek(b.name,i));
                 const emp = sorted.find(e => !exc.includes(e.name) && canAssign(e, i, 'sw'));
                 if (emp) d.sw = emp.name;
+            }
+
+            // ── АВАРИЙНЫЙ PASS: заполняем пустые обязательные слоты без лимита 5 смен ──
+            // Если после всех шагов остались пустые morningInside/eveningInside/morningManager/eveningManager
+            const insidePool = [
+                ...(employees.level6||[]).filter(e => e.canInside),
+                ...(employees.level5||[]).filter(e => e.canInside),
+                ...(employees.level4||[]).filter(e => e.canInside),
+            ];
+            const mgrPool = [...(employees.level3||[]), ...(employees.level2||[])];
+
+            for (let i = s; i <= e; i++) {
+                const d = currentSchedule[i];
+                if (!d || !d.isCurrentMonth) continue;
+
+                if (!d.morningInside && insidePool.length) {
+                    const cands = insidePool.filter(e =>
+                        countShiftsOnDayRecord(e.name, d) === 0 &&
+                        !isEmployeeOnRequest(e.name, d.day, 'off') &&
+                        canWorkAfterShiftIdx(e.name, i, 'morningInside')
+                    ).sort((a,b) => countShiftsInWeek(a.name,i) - countShiftsInWeek(b.name,i));
+                    if (cands.length) d.morningInside = cands[0].name;
+                }
+
+                if (!d.eveningInside && insidePool.length) {
+                    const cands = insidePool.filter(e =>
+                        countShiftsOnDayRecord(e.name, d) === 0 &&
+                        !isEmployeeOnRequest(e.name, d.day, 'off')
+                    ).sort((a,b) => countShiftsInWeek(a.name,i) - countShiftsInWeek(b.name,i));
+                    if (cands.length) d.eveningInside = cands[0].name;
+                }
+
+                if (!d.morningManager && mgrPool.length) {
+                    const prev = currentSchedule[i-1];
+                    const cands = mgrPool.filter(e =>
+                        countShiftsOnDayRecord(e.name, d) === 0 &&
+                        !isEmployeeOnRequest(e.name, d.day, 'off') &&
+                        !(prev && ['eveningInside','eveningManager','night','night2'].some(k => prev[k]===e.name))
+                    ).sort((a,b) => countShiftsInWeek(a.name,i) - countShiftsInWeek(b.name,i));
+                    if (!cands.length) {
+                        // крайний случай — игнорируем запрет вечер→утро
+                        const all = mgrPool.filter(e => countShiftsOnDayRecord(e.name, d) === 0)
+                            .sort((a,b) => countShiftsInWeek(a.name,i) - countShiftsInWeek(b.name,i));
+                        if (all.length) d.morningManager = all[0].name;
+                    } else {
+                        d.morningManager = cands[0].name;
+                    }
+                }
+
+                if (!d.eveningManager && mgrPool.length) {
+                    const cands = mgrPool.filter(e =>
+                        countShiftsOnDayRecord(e.name, d) === 0 &&
+                        !isEmployeeOnRequest(e.name, d.day, 'off')
+                    ).sort((a,b) => countShiftsInWeek(a.name,i) - countShiftsInWeek(b.name,i));
+                    if (cands.length) d.eveningManager = cands[0].name;
+                }
             }
 
             try { enforceAfterNightRulesForRange(s, e); } catch (err) { console.error(err); }
@@ -9450,11 +9549,11 @@ ${weeksHtml}
         }
 
         function fillRemainingNightsWithHighLevels(s, e) {
-            // Приоритет: level3 → level4 → level5
+            // Политика: ночными управляет уровень не ниже 3-го
+            // Убран фильтр e.nightShifts — этого флага нет ни у кого
             const nightPriority = [
-                ...(employees.level3 || []).filter(e => e.nightShifts),
-                ...(employees.level4 || []).filter(e => e.nightShifts),
-                ...(employees.level5 || []).filter(e => e.nightShifts),
+                ...(employees.level3 || []),
+                ...(employees.level2 || []),
             ];
             for (let i = e; i >= s; i--) {
                 const d = currentSchedule[i];
