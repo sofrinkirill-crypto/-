@@ -770,7 +770,7 @@
                 { name: 'Ариана', canInside: true, level: 'level3' }
             ],
             level6: [
-                { name: 'Лиза', canInside: true, level: 'level6' }
+                { name: 'Лиза', canInside: false, level: 'level6' }
             ]
         };
 
@@ -837,7 +837,7 @@
             }
             // Night slots: require nightShifts flag
             if (slotKey === 'night' || slotKey === 'night2') {
-                if (!emp.nightShifts) return false;
+                if (emp.level !== 'level3' && emp.level !== 'level2') return false;
                 const pboNightShifts = document.getElementById('pboNightShifts')?.value === 'true';
                 const lastCurrentIdx = (() => { let ii = -1; for (let i = 0; i < currentSchedule.length; i++) { if (currentSchedule[i].isCurrentMonth) ii = i; } return ii; })();
                 if (!pboNightShifts && dayIdx !== lastCurrentIdx) return false;
@@ -8984,6 +8984,8 @@ ${weeksHtml}
             const allEmps = getAllEmployees();
             const totalWeeks = Math.ceil(currentSchedule.length / 7);
             window._empRotationPlan = {};
+            // Случайный nonce для разнообразия между генерациями
+            const genNonce = Math.floor(Math.random() * 97);
 
             allEmps.forEach((emp, empIdx) => {
                 const dayPlan = {}; // dayIndex → 'morning' | 'evening' | 'off'
@@ -9056,7 +9058,7 @@ ${weeksHtml}
 
                     // Ротация: смещение пары выходных меняется каждую неделю
                     if (!offPair) {
-                        const rotStep = (empHash * 3 + w * 2) % Math.max(weekLen - 1, 1);
+                        const rotStep = (empHash * 3 + w * 2 + genNonce) % Math.max(weekLen - 1, 1);
                         for (let attempt = 0; attempt < weekLen - 1; attempt++) {
                             const pairStart = (rotStep + attempt) % (weekLen - 1);
                             // Не создаём 4+ выходных подряд (конец пред. недели + начало этой)
@@ -9094,7 +9096,7 @@ ${weeksHtml}
 
                     // Ротация 2У+2В: фаза = хэш + номер недели
                     // 0,1 → утро; 2,3 → вечер; 4+ → утро (если 5 рабочих дней)
-                    const phase = (empHash + w) % 4;
+                    const phase = (empHash + w + genNonce) % 4;
                     workDays.forEach((di, wi) => {
                         const p = (wi + phase) % 4;
                         dayPlan[wStart + di] = p < 2 ? 'morning' : 'evening';
